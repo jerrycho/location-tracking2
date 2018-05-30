@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">location-tracking</string>
+    <string name="location_updated">location updated</string>
+
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+</resources>
