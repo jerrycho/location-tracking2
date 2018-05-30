@@ -13,11 +13,15 @@ import android.util.Log;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.Timer;
 import java.util.TimerTask;
 
+import app.mmguardian.com.location_tracking.LocationTrackingApplication;
+import app.mmguardian.com.location_tracking.bus.NewLocationTrackingRecordEvent;
+import app.mmguardian.com.location_tracking.db.model.LocationRecord;
 
 public class SensorService extends Service {
 
@@ -85,7 +89,9 @@ public class SensorService extends Service {
                 .addOnSuccessListener(new OnSuccessListener<Location>() {
                     @Override
                     public void onSuccess(Location location) {
-                        //TODO
+                        LocationRecord mLocationRecord = new LocationRecord(location);
+                        LocationTrackingApplication.getInstance().getLocationDatabase().locationRecordDao.insertLocationRecord(mLocationRecord);
+                        EventBus.getDefault().post(new NewLocationTrackingRecordEvent(mLocationRecord));
                     }
                 });
     }
