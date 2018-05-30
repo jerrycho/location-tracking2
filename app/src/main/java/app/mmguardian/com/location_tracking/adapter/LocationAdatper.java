@@ -8,15 +8,16 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import app.mmguardian.com.location_tracking.R;
 import app.mmguardian.com.location_tracking.db.model.LocationRecord;
 
 public class LocationAdatper extends RecyclerView.Adapter<LocationAdatper.ViewHolder>{
 
-    ArrayList<LocationRecord> alLocationRecord;
+    List<LocationRecord> alLocationRecord;
 
-    public LocationAdatper( ArrayList<LocationRecord> alLocationRecord) {
+    public LocationAdatper( List<LocationRecord> alLocationRecord) {
         this.alLocationRecord = alLocationRecord;
     }
 
@@ -28,7 +29,7 @@ public class LocationAdatper extends RecyclerView.Adapter<LocationAdatper.ViewHo
 
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, int position) {
-        viewHolder.tvDate.setText(alLocationRecord.get(position).getDate().toString());
+        //viewHolder.tvDate.setText(alLocationRecord.get(position).getDate().toString());
         //viewHolder.tvAddress.setText(items.get(position).getTime());
     }
 

@@ -1,7 +1,9 @@
 package app.mmguardian.com.location_tracking;
 
 import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -13,10 +15,12 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import app.mmguardian.com.location_tracking.adapter.LocationAdatper;
 import app.mmguardian.com.location_tracking.bus.NewLocationTrackingRecordEvent;
+import app.mmguardian.com.location_tracking.db.model.LocationRecord;
 import app.mmguardian.com.location_tracking.service.SensorService;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
@@ -37,8 +41,8 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
 
         rcvLocationRecord = (RecyclerView) findViewById(R.id.rcvLocationRecord);
         rcvLocationRecord.setLayoutManager(new LinearLayoutManager(getApplication()));
-        mAdapter = new LocationAdatper(LocationTrackingApplication.getInstance().getLocationDatabase().locationRecordDao.getAll());
-        rcvLocationRecord.setAdapter(mAdapter);
+
+        new AsyncTaskRunner().execute();
 
         doGetLocation();
     }
@@ -95,5 +99,19 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
     public void onNewLocationTrackingRecordEvent(NewLocationTrackingRecordEvent event) {
         mAdapter.add(event.getmLocationRecord());
         mAdapter.notifyDataSetChanged();
+    }
+
+    private class AsyncTaskRunner extends AsyncTask<Void, Void, List<LocationRecord>> {
+
+        @Override
+        protected List<LocationRecord> doInBackground(Void... params) {
+            return LocationTrackingApplication.getInstance().getLocationDatabase().locationRecordDao().getAll();
+        }
+
+        @Override
+        protected void onPostExecute(List<LocationRecord> locationRecords) {
+            mAdapter = new LocationAdatper(locationRecords);
+            rcvLocationRecord.setAdapter(mAdapter);
+        }
     }
 }
