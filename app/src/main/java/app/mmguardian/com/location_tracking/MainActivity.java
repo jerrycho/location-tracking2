@@ -2,10 +2,14 @@ package app.mmguardian.com.location_tracking;
 
 import android.Manifest;
 import android.app.ActivityManager;
-import android.app.ProgressDialog;
+import android.app.job.JobInfo;
+import android.app.job.JobScheduler;
+import android.app.job.JobService;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -18,20 +22,22 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import app.mmguardian.com.location_tracking.adapter.LocationAdatper;
 import app.mmguardian.com.location_tracking.bus.NewLocationTrackingRecordEvent;
 import app.mmguardian.com.location_tracking.db.model.LocationRecord;
+import app.mmguardian.com.location_tracking.service.LocationJobService;
 import app.mmguardian.com.location_tracking.service.SensorService;
+import app.mmguardian.com.location_tracking.utils.Util;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
 
 public class MainActivity extends AppCompatActivity implements EasyPermissions.PermissionCallbacks {
 
-    public final static String TAG = MainActivity.class.getSimpleName();
+    public final static String TAG = "location_tracking";
 
     private static final int PERMISSIONS_REQUEST_ACCESS_LOCATION = 100;
 
@@ -100,8 +106,7 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
     }
 
     private void doStartService(){
-        if (!isServiceRunning(SensorService.class))
-            startService(new Intent(this, SensorService.class));
+        Util.startService(MainActivity.this);
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -125,15 +130,5 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
             mAdapter = new LocationAdatper(locationRecords);
             rcvLocationRecord.setAdapter(mAdapter);
         }
-    }
-
-    private boolean isServiceRunning(Class<?> serviceClass) {
-        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-            if (serviceClass.getName().equals(service.service.getClassName())) {
-                return true;
-            }
-        }
-        return false;
     }
 }

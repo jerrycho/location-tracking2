@@ -2,6 +2,8 @@ package app.mmguardian.com.location_tracking.service;
 
 import android.Manifest;
 import android.app.Service;
+import android.app.job.JobInfo;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -20,6 +22,7 @@ import org.greenrobot.eventbus.EventBus;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 
 import app.mmguardian.com.location_tracking.LocationTrackingApplication;
 import app.mmguardian.com.location_tracking.MainActivity;
@@ -29,7 +32,7 @@ import app.mmguardian.com.location_tracking.db.model.LocationRecord;
 
 public class SensorService extends Service {
 
-    public final static String TAG = SensorService.class.getSimpleName();
+    public final static String TAG = "location_tracking";
 
     private Timer mTimer;
     private TimerTask mTimerTask;

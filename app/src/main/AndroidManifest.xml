@@ -2,6 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="app.mmguardian.com.location_tracking" >
 
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
@@ -26,6 +27,9 @@
             android:enabled="true" >
         </service>
 
+        <service android:name=".service.LocationJobService"
+            android:permission="android.permission.BIND_JOB_SERVICE"/>
+
         <receiver
             android:name=".receiver.SensorRestarterBroadcastReceiver"
             android:enabled="true"
@@ -33,6 +37,16 @@
             android:label="RestartServiceWhenStopped">
             <intent-filter>
                 <action android:name="app.mmguardian.com.location_tracking.RestartSensor"/>
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".receiver.BootReceiver"
+            android:directBootAware="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </receiver>
 
