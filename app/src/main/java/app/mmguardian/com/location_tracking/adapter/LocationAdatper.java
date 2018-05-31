@@ -29,13 +29,13 @@ public class LocationAdatper extends RecyclerView.Adapter<LocationAdatper.ViewHo
 
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, int position) {
-        //viewHolder.tvDate.setText(alLocationRecord.get(position).getDate().toString());
-        //viewHolder.tvAddress.setText(items.get(position).getTime());
+        viewHolder.tvDate.setText(alLocationRecord.get(position).date);
+        //viewHolder.tvAddress.setText(String.valueOf(alLocationRecord.get(position).mAltitude));
     }
 
     @Override
     public int getItemCount() {
-        return 0;
+        return alLocationRecord.size();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder{

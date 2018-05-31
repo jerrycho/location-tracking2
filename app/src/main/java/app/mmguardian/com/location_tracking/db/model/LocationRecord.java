@@ -11,7 +11,7 @@ import android.location.Location;
 
 import java.util.Date;
 
-@Entity(indices = {@Index(value = "date", unique = true)})
+@Entity(indices = {@Index(value = "id", unique = true)})
 public class LocationRecord {
 
     @Ignore

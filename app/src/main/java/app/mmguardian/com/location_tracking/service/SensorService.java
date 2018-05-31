@@ -5,6 +5,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -16,10 +17,13 @@ import com.google.android.gms.tasks.OnSuccessListener;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import app.mmguardian.com.location_tracking.LocationTrackingApplication;
+import app.mmguardian.com.location_tracking.MainActivity;
+import app.mmguardian.com.location_tracking.adapter.LocationAdatper;
 import app.mmguardian.com.location_tracking.bus.NewLocationTrackingRecordEvent;
 import app.mmguardian.com.location_tracking.db.model.LocationRecord;
 
@@ -58,7 +62,7 @@ public class SensorService extends Service {
     public void doStartTimer() {
         mTimer = new Timer();
         initTimerTask();
-        mTimer.schedule(mTimerTask, 0, app.mmguardian.com.Constants.SCHEDULER_TIME);
+        mTimer.schedule(mTimerTask, app.mmguardian.com.Constants.SCHEDULER_TIME, app.mmguardian.com.Constants.SCHEDULER_TIME);
     }
 
     public void doStopTimer() {
@@ -89,10 +93,19 @@ public class SensorService extends Service {
                 .addOnSuccessListener(new OnSuccessListener<Location>() {
                     @Override
                     public void onSuccess(Location location) {
-                        LocationRecord mLocationRecord = new LocationRecord();
-                        LocationTrackingApplication.getInstance().getLocationDatabase().locationRecordDao().insertLocationRecord(mLocationRecord);
+                        LocationRecord mLocationRecord = new LocationRecord(location);
+                        new AsyncTaskRunner().execute(mLocationRecord);
                         EventBus.getDefault().post(new NewLocationTrackingRecordEvent(mLocationRecord));
                     }
                 });
+    }
+
+    private class AsyncTaskRunner extends AsyncTask<LocationRecord, Void, Void> {
+        @Override
+        protected Void doInBackground(LocationRecord... params) {
+            LocationTrackingApplication.getInstance().getLocationDatabase().locationRecordDao().insertLocationRecord(params[0]);
+            Log.d(TAG, "inserted>>"+params[0].date);
+            return null;
+        }
     }
 }

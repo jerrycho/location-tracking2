@@ -18,7 +18,9 @@ public class LocationTrackingApplication extends Application {
     public void onCreate() {
         super.onCreate();
         instance = this;
-        mLocationDatabase = Room.inMemoryDatabaseBuilder(getApplicationContext(), LocationDatabase.class).build();
+        mLocationDatabase =
+                Room.databaseBuilder(getApplicationContext(), LocationDatabase.class, "location.db").build();
+
     }
 
     public LocationDatabase getLocationDatabase() {

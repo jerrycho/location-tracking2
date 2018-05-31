@@ -1,7 +1,9 @@
 package app.mmguardian.com.location_tracking;
 
 import android.Manifest;
+import android.app.ActivityManager;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
@@ -9,6 +11,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.widget.Toast;
 
 import org.greenrobot.eventbus.EventBus;
@@ -28,6 +31,8 @@ import pub.devrel.easypermissions.EasyPermissions;
 
 public class MainActivity extends AppCompatActivity implements EasyPermissions.PermissionCallbacks {
 
+    public final static String TAG = MainActivity.class.getSimpleName();
+
     private static final int PERMISSIONS_REQUEST_ACCESS_LOCATION = 100;
 
     RecyclerView rcvLocationRecord;
@@ -40,7 +45,10 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         EventBus.getDefault().register(this);
 
         rcvLocationRecord = (RecyclerView) findViewById(R.id.rcvLocationRecord);
-        rcvLocationRecord.setLayoutManager(new LinearLayoutManager(getApplication()));
+        LinearLayoutManager verticalLinearLayoutManager = new LinearLayoutManager(this);
+        verticalLinearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        rcvLocationRecord.setLayoutManager(verticalLinearLayoutManager);
+        rcvLocationRecord.setHasFixedSize(true);
 
         new AsyncTaskRunner().execute();
 
@@ -92,12 +100,15 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
     }
 
     private void doStartService(){
-        startService(new Intent(this, SensorService.class));
+        if (!isServiceRunning(SensorService.class))
+            startService(new Intent(this, SensorService.class));
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onNewLocationTrackingRecordEvent(NewLocationTrackingRecordEvent event) {
         mAdapter.add(event.getmLocationRecord());
+
+        Log.d(TAG, "onStartCommand >>" +mAdapter.getItemCount());
         mAdapter.notifyDataSetChanged();
     }
 
@@ -105,6 +116,7 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
 
         @Override
         protected List<LocationRecord> doInBackground(Void... params) {
+            Log.d(TAG, "SIZE>>> " + String.valueOf(LocationTrackingApplication.getInstance().getLocationDatabase().locationRecordDao().getAll().size()));
             return LocationTrackingApplication.getInstance().getLocationDatabase().locationRecordDao().getAll();
         }
 
@@ -113,5 +125,15 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
             mAdapter = new LocationAdatper(locationRecords);
             rcvLocationRecord.setAdapter(mAdapter);
         }
+    }
+
+    private boolean isServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
     }
 }
