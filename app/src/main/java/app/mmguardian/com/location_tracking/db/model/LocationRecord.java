@@ -14,13 +14,11 @@ import java.util.Date;
 @Entity(indices = {@Index(value = "id", unique = true)})
 public class LocationRecord {
 
-    @Ignore
-    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-mm-dd HH:mm:ss");
 
     @PrimaryKey(autoGenerate = true)
     public int id;
 
-    public String date;
+    public Long date;
     public double mLatitude = 0.0f;
     public double mLongitude = 0.0f;
     public double mAltitude = 0.0f;
@@ -30,7 +28,7 @@ public class LocationRecord {
     }
 
     public LocationRecord(Location location) {
-        this.date = sdf.format(Calendar.getInstance());
+        this.date = Calendar.getInstance().getTimeInMillis();
         this.mAltitude = location.getAltitude();
         this.mLatitude = location.getLatitude();
         this.mLongitude = location.getLongitude();

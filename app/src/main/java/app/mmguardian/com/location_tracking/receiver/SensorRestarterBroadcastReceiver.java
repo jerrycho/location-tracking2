@@ -12,6 +12,6 @@ public class SensorRestarterBroadcastReceiver extends BroadcastReceiver{
     @Override
     public void onReceive(Context context, Intent intent) {
         //start the service
-        context.startService(new Intent(context, SensorService.class));
+        //context.startService(new Intent(context, SensorService.class));
     }
 }

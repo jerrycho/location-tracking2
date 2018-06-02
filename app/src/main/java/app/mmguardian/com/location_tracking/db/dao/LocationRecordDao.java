@@ -25,7 +25,7 @@ public interface LocationRecordDao {
     @Insert
     public void insertLocationRecord(LocationRecord locationRecord);
 
-    @Query("select * from LocationRecord")
+    @Query("select * from LocationRecord order by date desc")
     public List<LocationRecord> getAll();
 
 }

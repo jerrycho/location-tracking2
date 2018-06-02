@@ -96,9 +96,11 @@ public class SensorService extends Service {
                 .addOnSuccessListener(new OnSuccessListener<Location>() {
                     @Override
                     public void onSuccess(Location location) {
-                        LocationRecord mLocationRecord = new LocationRecord(location);
-                        new AsyncTaskRunner().execute(mLocationRecord);
-                        EventBus.getDefault().post(new NewLocationTrackingRecordEvent(mLocationRecord));
+                        if (location!=null) {
+                            LocationRecord mLocationRecord = new LocationRecord(location);
+                            new AsyncTaskRunner().execute(mLocationRecord);
+                            EventBus.getDefault().post(new NewLocationTrackingRecordEvent(mLocationRecord));
+                        }
                     }
                 });
     }
