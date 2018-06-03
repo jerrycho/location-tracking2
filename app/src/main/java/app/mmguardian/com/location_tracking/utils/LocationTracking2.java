@@ -76,11 +76,9 @@ public class LocationTracking2 {
                 .addOnSuccessListener(new OnSuccessListener<Location>() {
                     @Override
                     public void onSuccess(Location location) {
-                        if (location!=null) {
-                            LocationRecord mLocationRecord = new LocationRecord(location);
-                            new AsyncTaskRunner().execute(mLocationRecord);
-                            EventBus.getDefault().post(new NewLocationTrackingRecordEvent(mLocationRecord));
-                        }
+                        LocationRecord mLocationRecord = new LocationRecord(location);
+                        new AsyncTaskRunner().execute(mLocationRecord);
+                        EventBus.getDefault().post(new NewLocationTrackingRecordEvent(mLocationRecord));
                     }
                 });
     }

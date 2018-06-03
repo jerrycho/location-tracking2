@@ -18,10 +18,11 @@ public class LocationRecord {
     @PrimaryKey(autoGenerate = true)
     public int id;
 
+    public boolean isNull = true;
     public Long date;
-    public double mLatitude = 0.0f;
-    public double mLongitude = 0.0f;
-    public double mAltitude = 0.0f;
+    public double latitude = 0.0f;
+    public double longitude = 0.0f;
+    public double altitude = 0.0f;
 
     public LocationRecord() {
 
@@ -29,75 +30,11 @@ public class LocationRecord {
 
     public LocationRecord(Location location) {
         this.date = Calendar.getInstance().getTimeInMillis();
-        this.mAltitude = location.getAltitude();
-        this.mLatitude = location.getLatitude();
-        this.mLongitude = location.getLongitude();
+        if (location != null) {
+            this.isNull =false;
+            this.altitude = location.getAltitude();
+            this.latitude = location.getLatitude();
+            this.longitude = location.getLongitude();
+        }
     }
 }
-
-//import android.arch.persistence.room.ColumnInfo;
-//import android.arch.persistence.room.Entity;
-//import android.arch.persistence.room.PrimaryKey;
-//import android.location.Location;
-//
-//import java.util.Date;
-//
-//@Entity
-//public class LocationRecord {
-//
-//    @PrimaryKey(autoGenerate = true)
-//    public int uid;
-//
-//    @ColumnInfo
-//    public Date date;
-//
-//    @ColumnInfo
-//    public double mLatitude = 0.0;
-//
-//    @ColumnInfo
-//    public double mLongitude = 0.0;
-//
-//    @ColumnInfo
-//    public double mAltitude = 0.0f;
-//
-//    public LocationRecord(){}
-//
-//    public LocationRecord(Location location) {
-//        this.date = new Date();
-//        this.mAltitude = location.getAltitude();
-//        this.mLatitude = location.getLatitude();
-//        this.mLongitude = location.getLongitude();
-//    }
-//
-//    public Date getDate() {
-//        return date;
-//    }
-//
-//    public void setDate(Date date) {
-//        this.date = date;
-//    }
-//
-//    public double getmLatitude() {
-//        return mLatitude;
-//    }
-//
-//    public void setmLatitude(double mLatitude) {
-//        this.mLatitude = mLatitude;
-//    }
-//
-//    public double getmLongitude() {
-//        return mLongitude;
-//    }
-//
-//    public void setmLongitude(double mLongitude) {
-//        this.mLongitude = mLongitude;
-//    }
-//
-//    public double getmAltitude() {
-//        return mAltitude;
-//    }
-//
-//    public void setmAltitude(double mAltitude) {
-//        this.mAltitude = mAltitude;
-//    }
-//}
