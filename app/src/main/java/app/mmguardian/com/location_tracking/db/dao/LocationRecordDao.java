@@ -16,16 +16,13 @@ import app.mmguardian.com.location_tracking.db.model.User;
 @Dao
 public interface LocationRecordDao {
 
-//    @Query("SELECT * FROM LocationRecord")
-//    ArrayList<LocationRecord> getAll();
-//
-//    @Insert(onConflict = OnConflictStrategy.REPLACE)
-//    void insertLocationRecord(LocationRecord locationRecord);
-
     @Insert
-    public void insertLocationRecord(LocationRecord locationRecord);
+    void insertLocationRecord(LocationRecord locationRecord);
 
     @Query("select * from LocationRecord order by date desc")
-    public List<LocationRecord> getAll();
+    List<LocationRecord> getAll();
+
+    @Query("select * from LocationRecord where id = :id")
+    LocationRecord getById(int id);
 
 }

@@ -4,6 +4,7 @@ package app.mmguardian.com.location_tracking.adapter;
 import android.arch.persistence.room.Ignore;
 import android.icu.text.SimpleDateFormat;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,8 +37,25 @@ public class LocationAdatper extends RecyclerView.Adapter<LocationAdatper.ViewHo
     public void onBindViewHolder(ViewHolder viewHolder, int position) {
         LocationRecord mLocationRecord = alLocationRecord.get(position);
 
-        viewHolder.tvDate.setText(sdf.format(new Date(mLocationRecord.date)));
-        //viewHolder.tvAddress.setText(String.valueOf(alLocationRecord.get(position).mAltitude));
+        viewHolder.tvDate.setText("Time : " + sdf.format(new Date(mLocationRecord.date)));
+        if (TextUtils.isEmpty(mLocationRecord.address)){
+            viewHolder.tvAddress.setText("Address : ---");
+        }
+        else {
+            viewHolder.tvAddress.setText("Address : " +mLocationRecord.address);
+        }
+
+        if (mLocationRecord.isNull){
+            viewHolder.tvLotLong.setText("Cannot get location");
+        }
+        else {
+            viewHolder.tvLotLong.setText(
+                    "Latitude : " + String.valueOf(mLocationRecord.latitude) + "\n"+
+                    "Longitude : " + String.valueOf(mLocationRecord.longitude)
+
+            );
+        }
+
     }
 
     @Override
@@ -48,11 +66,13 @@ public class LocationAdatper extends RecyclerView.Adapter<LocationAdatper.ViewHo
     public class ViewHolder extends RecyclerView.ViewHolder{
         public TextView tvDate;
         public TextView tvAddress;
+        public TextView tvLotLong;
 
         public ViewHolder(View itemView) {
             super(itemView);
             tvDate = itemView.findViewById(R.id.tvDate);
-            tvDate= itemView.findViewById(R.id.tvAddress);
+            tvAddress= itemView.findViewById(R.id.tvAddress);
+            tvLotLong = itemView.findViewById(R.id.tvLotLong);
         }
     }
 

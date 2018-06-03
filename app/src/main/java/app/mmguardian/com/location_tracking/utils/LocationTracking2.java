@@ -4,9 +4,12 @@ package app.mmguardian.com.location_tracking.utils;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.support.v4.app.ActivityCompat;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -15,6 +18,9 @@ import com.google.android.gms.tasks.OnSuccessListener;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -36,12 +42,15 @@ public class LocationTracking2 {
 
     int mInterval;
 
+    Geocoder mGeocoder;
+
     private FusedLocationProviderClient mFusedLocationProviderClient;
 
     public LocationTracking2(Context context) {
         this.context = context;
         mTimer = new Timer();
         mInterval = Constants.SCHEDULER_TIME_SEC;
+        mGeocoder = new Geocoder(context);
     }
 
     public void doStartTimer(){
@@ -76,19 +85,48 @@ public class LocationTracking2 {
                 .addOnSuccessListener(new OnSuccessListener<Location>() {
                     @Override
                     public void onSuccess(Location location) {
-                        LocationRecord mLocationRecord = new LocationRecord(location);
-                        new AsyncTaskRunner().execute(mLocationRecord);
-                        EventBus.getDefault().post(new NewLocationTrackingRecordEvent(mLocationRecord));
+                        new AsyncInsertDBTaskRunner().execute(location);
                     }
                 });
     }
 
-    private class AsyncTaskRunner extends AsyncTask<LocationRecord, Void, Void> {
+    private class AsyncInsertDBTaskRunner extends AsyncTask<Location, Void, Void> {
         @Override
-        protected Void doInBackground(LocationRecord... params) {
-            LocationTrackingApplication.getInstance().getLocationDatabase().locationRecordDao().insertLocationRecord(params[0]);
-            Log.d(TAG, "inserted>>"+params[0].date);
+        protected Void doInBackground(Location... params) {
+            Location location = params[0];
+            String address = "";
+            List<Address> addresses = null;
+
+            try {
+                addresses = mGeocoder.getFromLocation(
+                        location.getLatitude(),
+                        location.getLongitude(),
+                        // In this sample, get just a single address.
+                        1);
+            } catch (IOException ioException){
+                address = "Service not available";
+            } catch (IllegalArgumentException illegalArgumentException) {
+                address = "Invalid Latitude & Longitude";
+            }
+
+            if (addresses == null || addresses.size() ==0){
+                if (address.isEmpty()){
+                    address = "No address found";
+                }
+            } else {
+                Address address1 = addresses.get(0);
+                ArrayList<String> alAddress = new ArrayList<String>();
+                for(int i = 0; i <= address1.getMaxAddressLineIndex(); i++) {
+                    alAddress.add(address1.getAddressLine(i));
+                }
+                address = TextUtils.join(System.getProperty("line.separator"), alAddress);
+            }
+
+            LocationRecord mLocationRecord = new LocationRecord(location, address);
+            LocationTrackingApplication.getInstance().getLocationDatabase().locationRecordDao().insertLocationRecord(mLocationRecord);
+            EventBus.getDefault().post(new NewLocationTrackingRecordEvent(mLocationRecord));
             return null;
         }
+
     }
 }

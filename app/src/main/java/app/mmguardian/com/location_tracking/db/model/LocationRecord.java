@@ -18,18 +18,24 @@ public class LocationRecord {
     @PrimaryKey(autoGenerate = true)
     public int id;
 
+    @Ignore
+    public Location mLocation;
+
     public boolean isNull = true;
     public Long date;
     public double latitude = 0.0f;
     public double longitude = 0.0f;
     public double altitude = 0.0f;
+    public String address;
 
     public LocationRecord() {
 
     }
 
-    public LocationRecord(Location location) {
+    public LocationRecord(Location location, String address) {
         this.date = Calendar.getInstance().getTimeInMillis();
+        this.address = address;
+        this.mLocation = location;
         if (location != null) {
             this.isNull =false;
             this.altitude = location.getAltitude();
