@@ -1,7 +1,9 @@
 package app.mmguardian.com.location_tracking;
 
 import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.Intent;
+import android.icu.text.SimpleDateFormat;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -9,6 +11,9 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.View;
+import android.widget.CheckBox;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -16,10 +21,15 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
+import app.mmguardian.com.Constants;
 import app.mmguardian.com.location_tracking.adapter.LocationAdatper;
 import app.mmguardian.com.location_tracking.bus.NewLocationTrackingRecordEvent;
+import app.mmguardian.com.location_tracking.bus.RemainTimeEvent;
+import app.mmguardian.com.location_tracking.bus.ServiceEventConnectedEvent;
 import app.mmguardian.com.location_tracking.db.model.LocationRecord;
 import app.mmguardian.com.location_tracking.service.LocationJobIntentService;
 import app.mmguardian.com.location_tracking.utils.Util;
@@ -32,11 +42,15 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
     public final static String TAG = "location_tracking";
 
     private static final int PERMISSIONS_REQUEST_ACCESS_LOCATION = 100;
+    private ProgressDialog pd;
+
+    LinearLayout llLoading;
 
     RecyclerView rcvLocationRecord;
     LocationAdatper mAdapter;
 
-    TextView tvPermissionStatus;
+    TextView tvCountDownTime;
+    CheckBox cbHaveRight;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,12 +59,19 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         EventBus.getDefault().register(this);
 
         rcvLocationRecord = (RecyclerView) findViewById(R.id.rcvLocationRecord);
-        tvPermissionStatus = findViewById(R.id.tvPermissionStatus);
-        tvPermissionStatus.setText("No Permission to access location!");
+        cbHaveRight = (CheckBox) findViewById(R.id.cbHaveRight);
+        llLoading = (LinearLayout) findViewById(R.id.llLoading);
+        tvCountDownTime = findViewById(R.id.tvCountDownTime);
+
+        llLoading.setVisibility(View.VISIBLE);
+        cbHaveRight.setChecked(Boolean.FALSE);
+        tvCountDownTime.setText(displayHHMMSSBySec(Constants.SCHEDULER_TIME_SEC));
+
         LinearLayoutManager verticalLinearLayoutManager = new LinearLayoutManager(this);
         verticalLinearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         rcvLocationRecord.setLayoutManager(verticalLinearLayoutManager);
         rcvLocationRecord.setHasFixedSize(true);
+
         new AsyncGetRecordFromDBTaskRunner().execute();
         doRequestPermission();
     }
@@ -62,7 +83,6 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
                 Manifest.permission.ACCESS_FINE_LOCATION
         })){
             doStartService();
-
         }
         else {
             EasyPermissions.requestPermissions(this,
@@ -101,8 +121,8 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
     }
 
     private void doStartService(){
-//        Util.startService(MainActivity.this);
-        tvPermissionStatus.setText("Have Permission to access location!");
+        tvCountDownTime.setText(displayHHMMSSBySec(Constants.SCHEDULER_TIME_SEC));
+        cbHaveRight.setChecked(Boolean.TRUE);
         LocationJobIntentService.enqueueWork(MainActivity.this, new Intent());
     }
 
@@ -110,8 +130,18 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
     public void onNewLocationTrackingRecordEvent(NewLocationTrackingRecordEvent event) {
         mAdapter.add(0, event.getmLocationRecord());
 
-        Log.d(TAG, "onStartCommand >>" +mAdapter.getItemCount());
+        Log.d(TAG, "onNewLocationTrackingRecordEvent >>" +mAdapter.getItemCount());
         mAdapter.notifyDataSetChanged();
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onRemainTimeEvent(RemainTimeEvent event) {
+        tvCountDownTime.setText(displayHHMMSSBySec(event.getmSecond()));
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onServiceEventConnectedEvent(ServiceEventConnectedEvent event){
+        llLoading.setVisibility(View.GONE);
     }
 
     private class AsyncGetRecordFromDBTaskRunner extends AsyncTask<Void, Void, List<LocationRecord>> {
@@ -127,5 +157,10 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
             mAdapter = new LocationAdatper(locationRecords);
             rcvLocationRecord.setAdapter(mAdapter);
         }
+    }
+
+
+    private String displayHHMMSSBySec(long secs) {
+        return "Update remain : " + String.format("%02d:%02d:%02d", (secs % 86400) / 3600, (secs % 3600) / 60, secs % 60);
     }
 }
