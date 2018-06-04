@@ -2,20 +2,15 @@ package app.mmguardian.com.location_tracking.service;
 
 import android.content.Context;
 import android.content.Intent;
-import android.icu.text.SimpleDateFormat;
 import android.support.annotation.NonNull;
 import android.support.v4.app.JobIntentService;
 import android.util.Log;
 
 import org.greenrobot.eventbus.EventBus;
 
-import java.util.Date;
-
 import app.mmguardian.com.Constants;
 import app.mmguardian.com.location_tracking.bus.ServiceEventConnectedEvent;
-import app.mmguardian.com.location_tracking.utils.LocationTracking;
 import app.mmguardian.com.location_tracking.utils.LocationTracking2;
-import app.mmguardian.com.location_tracking.utils.Util;
 
 public class LocationJobIntentService extends JobIntentService {
 

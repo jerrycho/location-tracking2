@@ -22,11 +22,6 @@
             </intent-filter>
         </activity>
 
-        <service
-            android:name=".service.SensorService"
-            android:enabled="true" >
-        </service>
-
         <receiver
             android:name=".receiver.SensorRestarterBroadcastReceiver"
             android:enabled="true"

@@ -5,8 +5,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-import app.mmguardian.com.location_tracking.service.SensorService;
-
 public class SensorRestarterBroadcastReceiver extends BroadcastReceiver{
 
     @Override

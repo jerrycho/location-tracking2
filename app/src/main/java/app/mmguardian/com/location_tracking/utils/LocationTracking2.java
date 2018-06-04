@@ -27,11 +27,9 @@ import java.util.TimerTask;
 
 import app.mmguardian.com.Constants;
 import app.mmguardian.com.location_tracking.LocationTrackingApplication;
-import app.mmguardian.com.location_tracking.bus.DeleteRowEvent;
 import app.mmguardian.com.location_tracking.bus.NewLocationTrackingRecordEvent;
 import app.mmguardian.com.location_tracking.bus.RemainTimeEvent;
 import app.mmguardian.com.location_tracking.db.model.LocationRecord;
-import app.mmguardian.com.location_tracking.service.LocationJobIntentService;
 
 
 public class LocationTracking2 {
@@ -124,13 +122,12 @@ public class LocationTracking2 {
                 address = TextUtils.join(System.getProperty("line.separator"), alAddress);
             }
 
-            long date = Calendar.getInstance().getTimeInMillis();
-            int totolDeletedRecords = LocationTrackingApplication.getInstance().getLocationDatabase().locationRecordDao().deleteBeforeDate(date - Constants.RECORD_KEEP);
-            Log.d(TAG, "totolDeletedRecords>>>"+totolDeletedRecords);
-            EventBus.getDefault().post(new DeleteRowEvent(totolDeletedRecords));
+            long beforeDate = Calendar.getInstance().getTimeInMillis();
+            beforeDate -= Constants.RECORD_KEEP;
+            LocationTrackingApplication.getInstance().getLocationDatabase().locationRecordDao().deleteBeforeDate(beforeDate - Constants.RECORD_KEEP);
             LocationRecord mLocationRecord = new LocationRecord(location, address);
             LocationTrackingApplication.getInstance().getLocationDatabase().locationRecordDao().insertLocationRecord(mLocationRecord);
-            EventBus.getDefault().post(new NewLocationTrackingRecordEvent(mLocationRecord));
+            EventBus.getDefault().post(new NewLocationTrackingRecordEvent(mLocationRecord, beforeDate));
             return null;
         }
 

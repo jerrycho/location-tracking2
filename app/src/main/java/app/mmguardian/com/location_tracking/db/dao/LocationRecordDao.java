@@ -26,6 +26,6 @@ public interface LocationRecordDao {
     LocationRecord getById(int id);
 
     @Query("delete from LocationRecord where date < :date")
-    int deleteBeforeDate(long date);
+    void deleteBeforeDate(long date);
 
 }

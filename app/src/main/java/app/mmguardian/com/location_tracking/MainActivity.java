@@ -3,7 +3,6 @@ package app.mmguardian.com.location_tracking;
 import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.icu.text.SimpleDateFormat;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -21,19 +20,15 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 import app.mmguardian.com.Constants;
 import app.mmguardian.com.location_tracking.adapter.LocationAdatper;
-import app.mmguardian.com.location_tracking.bus.DeleteRowEvent;
 import app.mmguardian.com.location_tracking.bus.NewLocationTrackingRecordEvent;
 import app.mmguardian.com.location_tracking.bus.RemainTimeEvent;
 import app.mmguardian.com.location_tracking.bus.ServiceEventConnectedEvent;
 import app.mmguardian.com.location_tracking.db.model.LocationRecord;
 import app.mmguardian.com.location_tracking.service.LocationJobIntentService;
-import app.mmguardian.com.location_tracking.utils.Util;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
@@ -52,6 +47,8 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
 
     TextView tvCountDownTime;
     CheckBox cbHaveRight;
+
+    List<LocationRecord> mLocationRecords;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,11 +71,6 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         rcvLocationRecord.setHasFixedSize(true);
 
         doRequestPermission();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
         new AsyncGetRecordFromDBTaskRunner().execute();
     }
 
@@ -134,6 +126,15 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onNewLocationTrackingRecordEvent(NewLocationTrackingRecordEvent event) {
+
+        if (mAdapter.getItemCount() > 0 &&
+                mAdapter.getItemByPosition(mAdapter.getItemCount() - 1).date <event.getBeforeDate()){
+            int position = mLocationRecords.size()-1;
+            mAdapter.remove(position);
+            mAdapter.notifyItemRemoved(position);
+        }
+
+
         mAdapter.add(0, event.getmLocationRecord());
 
         Log.d(TAG, "onNewLocationTrackingRecordEvent >>" +mAdapter.getItemCount());
@@ -151,18 +152,13 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         llLoading.setVisibility(View.GONE);
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onDeleteRowEvent(DeleteRowEvent event){
-        mAdapter.removeTopTotalRow(event.getCount());
-
-    }
-
     private class AsyncGetRecordFromDBTaskRunner extends AsyncTask<Void, Void, List<LocationRecord>> {
 
         @Override
         protected List<LocationRecord> doInBackground(Void... params) {
-            Log.d(TAG, "SIZE>>> " + String.valueOf(LocationTrackingApplication.getInstance().getLocationDatabase().locationRecordDao().getAll().size()));
-            return LocationTrackingApplication.getInstance().getLocationDatabase().locationRecordDao().getAll();
+            mLocationRecords = LocationTrackingApplication.getInstance().getLocationDatabase().locationRecordDao().getAll();
+            Log.d(TAG, "SIZE>>> " + String.valueOf(mLocationRecords.size()));
+            return mLocationRecords;
         }
 
         @Override

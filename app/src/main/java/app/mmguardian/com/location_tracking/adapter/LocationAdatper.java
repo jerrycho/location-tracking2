@@ -1,17 +1,17 @@
 package app.mmguardian.com.location_tracking.adapter;
 
 
-import android.arch.persistence.room.Ignore;
+
 import android.icu.text.SimpleDateFormat;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
-import android.util.Log;
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import java.util.ArrayList;
+
 import java.util.Date;
 import java.util.List;
 
@@ -87,13 +87,11 @@ public class LocationAdatper extends RecyclerView.Adapter<LocationAdatper.ViewHo
         alLocationRecord.add(position, mLocationRecord);
     }
 
-    public void removeTopTotalRow(int count) {
-        int fromIndex = getItemCount() - count;
-//        Log.d(TAG, "alLocationRecord>>>" + alLocationRecord.size());
-//        Log.d(TAG, "before size : "+ alLocationRecord.size());
-        alLocationRecord.subList(
-                fromIndex, alLocationRecord.size()).clear();
-        notifyItemRangeRemoved(fromIndex, count);
-//        Log.d(TAG, "after size : "+ alLocationRecord.size());
+    public void remove(int position){
+        alLocationRecord.remove(position);
+    }
+
+    public LocationRecord getItemByPosition(int position){
+        return alLocationRecord.get(position);
     }
 }
