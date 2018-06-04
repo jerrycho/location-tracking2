@@ -28,21 +28,6 @@ public class LocationJobIntentService extends JobIntentService {
     }
 
 
-    protected void onHandleWork2(@NonNull Intent intent) {
-        Log.d(TAG, "onHandleWork>>>");
-        //Util.startService(this);
-        LocationTracking mLocationTracking = new LocationTracking(this);
-        mLocationTracking.doStartTimer();
-
-        try {
-            Log.d(TAG, "After??");
-            Thread.sleep(60 * 1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        mLocationTracking.doStopTimer();
-    }
-
     @Override
     protected void onHandleWork(@NonNull Intent intent) {
         Log.d(TAG, "onHandleWork>>>");
@@ -51,7 +36,7 @@ public class LocationJobIntentService extends JobIntentService {
         mLocationTracking2.doStartTimer();
 
         try {
-            Thread.sleep(Constants.SCHEDULER_TIME_SEC * 1000);
+            Thread.sleep(Constants.SCHEDULER_TIME_SEC * 1000 + 1000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

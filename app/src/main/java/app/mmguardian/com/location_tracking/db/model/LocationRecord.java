@@ -16,7 +16,7 @@ public class LocationRecord {
 
 
     @PrimaryKey(autoGenerate = true)
-    public int id;
+    public long id;
 
     @Ignore
     public Location mLocation;

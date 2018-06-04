@@ -4,6 +4,7 @@ package app.mmguardian.com.location_tracking.utils;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.icu.util.Calendar;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -26,6 +27,7 @@ import java.util.TimerTask;
 
 import app.mmguardian.com.Constants;
 import app.mmguardian.com.location_tracking.LocationTrackingApplication;
+import app.mmguardian.com.location_tracking.bus.DeleteRowEvent;
 import app.mmguardian.com.location_tracking.bus.NewLocationTrackingRecordEvent;
 import app.mmguardian.com.location_tracking.bus.RemainTimeEvent;
 import app.mmguardian.com.location_tracking.db.model.LocationRecord;
@@ -63,7 +65,7 @@ public class LocationTracking2 {
 
 
     private int setInterval() {
-        if (mInterval == 0) {
+        if (mInterval == 1) {
             doGetCurrentLocaiton();
             if (mTimer!=null) {
                 mTimer.cancel();
@@ -104,7 +106,7 @@ public class LocationTracking2 {
                         // In this sample, get just a single address.
                         1);
             } catch (IOException ioException){
-                address = "Service not available";
+                address = "Network service not available";
             } catch (IllegalArgumentException illegalArgumentException) {
                 address = "Invalid Latitude & Longitude";
             }
@@ -122,6 +124,10 @@ public class LocationTracking2 {
                 address = TextUtils.join(System.getProperty("line.separator"), alAddress);
             }
 
+            long date = Calendar.getInstance().getTimeInMillis();
+            int totolDeletedRecords = LocationTrackingApplication.getInstance().getLocationDatabase().locationRecordDao().deleteBeforeDate(date - Constants.RECORD_KEEP);
+            Log.d(TAG, "totolDeletedRecords>>>"+totolDeletedRecords);
+            EventBus.getDefault().post(new DeleteRowEvent(totolDeletedRecords));
             LocationRecord mLocationRecord = new LocationRecord(location, address);
             LocationTrackingApplication.getInstance().getLocationDatabase().locationRecordDao().insertLocationRecord(mLocationRecord);
             EventBus.getDefault().post(new NewLocationTrackingRecordEvent(mLocationRecord));

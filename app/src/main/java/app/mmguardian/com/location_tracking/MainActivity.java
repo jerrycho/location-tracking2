@@ -27,6 +27,7 @@ import java.util.Locale;
 
 import app.mmguardian.com.Constants;
 import app.mmguardian.com.location_tracking.adapter.LocationAdatper;
+import app.mmguardian.com.location_tracking.bus.DeleteRowEvent;
 import app.mmguardian.com.location_tracking.bus.NewLocationTrackingRecordEvent;
 import app.mmguardian.com.location_tracking.bus.RemainTimeEvent;
 import app.mmguardian.com.location_tracking.bus.ServiceEventConnectedEvent;
@@ -72,8 +73,13 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         rcvLocationRecord.setLayoutManager(verticalLinearLayoutManager);
         rcvLocationRecord.setHasFixedSize(true);
 
-        new AsyncGetRecordFromDBTaskRunner().execute();
         doRequestPermission();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        new AsyncGetRecordFromDBTaskRunner().execute();
     }
 
     @AfterPermissionGranted(PERMISSIONS_REQUEST_ACCESS_LOCATION)
@@ -131,7 +137,8 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         mAdapter.add(0, event.getmLocationRecord());
 
         Log.d(TAG, "onNewLocationTrackingRecordEvent >>" +mAdapter.getItemCount());
-        mAdapter.notifyDataSetChanged();
+        mAdapter.notifyItemInserted(0);
+        rcvLocationRecord.smoothScrollToPosition(0);
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -142,6 +149,12 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onServiceEventConnectedEvent(ServiceEventConnectedEvent event){
         llLoading.setVisibility(View.GONE);
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onDeleteRowEvent(DeleteRowEvent event){
+        mAdapter.removeTopTotalRow(event.getCount());
+
     }
 
     private class AsyncGetRecordFromDBTaskRunner extends AsyncTask<Void, Void, List<LocationRecord>> {

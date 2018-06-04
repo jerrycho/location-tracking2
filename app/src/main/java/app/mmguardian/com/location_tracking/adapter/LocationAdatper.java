@@ -5,6 +5,7 @@ import android.arch.persistence.room.Ignore;
 import android.icu.text.SimpleDateFormat;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +19,8 @@ import app.mmguardian.com.location_tracking.R;
 import app.mmguardian.com.location_tracking.db.model.LocationRecord;
 
 public class LocationAdatper extends RecyclerView.Adapter<LocationAdatper.ViewHolder>{
+
+    public static final String TAG = "location_tracking";
 
     List<LocationRecord> alLocationRecord;
 
@@ -82,5 +85,15 @@ public class LocationAdatper extends RecyclerView.Adapter<LocationAdatper.ViewHo
 
     public void add(int position, LocationRecord mLocationRecord){
         alLocationRecord.add(position, mLocationRecord);
+    }
+
+    public void removeTopTotalRow(int count) {
+        int fromIndex = getItemCount() - count;
+//        Log.d(TAG, "alLocationRecord>>>" + alLocationRecord.size());
+//        Log.d(TAG, "before size : "+ alLocationRecord.size());
+        alLocationRecord.subList(
+                fromIndex, alLocationRecord.size()).clear();
+        notifyItemRangeRemoved(fromIndex, count);
+//        Log.d(TAG, "after size : "+ alLocationRecord.size());
     }
 }
