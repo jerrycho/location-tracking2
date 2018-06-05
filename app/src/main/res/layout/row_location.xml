@@ -5,9 +5,11 @@
     android:layout_margin="10dp"
     card_view:cardCornerRadius="5dp"
     card_view:cardElevation="5dp"
-    android:layout_height="100dp">
+    android:layout_height="110dp">
 
     <LinearLayout
+        android:gravity="center"
+        android:layout_gravity="center"
         android:padding="10dp"
         android:orientation="horizontal"
         android:layout_width="match_parent"
