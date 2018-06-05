@@ -48,7 +48,7 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
     RecyclerView rcvLocationRecord;
     LocationAdatper mAdapter;
 
-    TextView tvCountDownTime;
+    public TextView tvCountDownTime;
     CheckBox cbHaveRight;
 
     List<LocationRecord> mLocationRecords;
@@ -75,6 +75,13 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
 
         doRequestPermission();
         new AsyncGetRecordFromDBTaskRunner().execute();
+    }
+
+    public boolean havePermission(){
+        return EasyPermissions.hasPermissions(this, new String[] {
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.ACCESS_FINE_LOCATION
+        });
     }
 
     @AfterPermissionGranted(PERMISSIONS_REQUEST_ACCESS_LOCATION)
@@ -121,7 +128,7 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         super.onDestroy();
     }
 
-    private void doStartService(){
+    public void doStartService(){
         tvCountDownTime.setText(displayHHMMSSBySec(Constants.SCHEDULER_TIME_SEC));
         cbHaveRight.setChecked(Boolean.TRUE);
         LocationJobIntentService.enqueueWork(MainActivity.this, new Intent());

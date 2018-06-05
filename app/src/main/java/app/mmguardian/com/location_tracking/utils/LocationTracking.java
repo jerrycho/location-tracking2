@@ -36,7 +36,7 @@ import app.mmguardian.com.location_tracking.fragment.GoogleMapFragment;
 import io.reactivex.functions.Consumer;
 
 
-public class LocationTracking2 {
+public class LocationTracking {
 
     public final static String TAG = "location_tracking";
 
@@ -50,7 +50,7 @@ public class LocationTracking2 {
 
     private FusedLocationProviderClient mFusedLocationProviderClient;
 
-    public LocationTracking2(Context context) {
+    public LocationTracking(Context context) {
         this.context = context;
         mTimer = new Timer();
         mInterval = Constants.SCHEDULER_TIME_SEC;

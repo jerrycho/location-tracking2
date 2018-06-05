@@ -10,7 +10,7 @@ import org.greenrobot.eventbus.EventBus;
 
 import app.mmguardian.com.Constants;
 import app.mmguardian.com.location_tracking.bus.ServiceEventConnectedEvent;
-import app.mmguardian.com.location_tracking.utils.LocationTracking2;
+import app.mmguardian.com.location_tracking.utils.LocationTracking;
 
 public class LocationJobIntentService extends JobIntentService {
 
@@ -27,8 +27,8 @@ public class LocationJobIntentService extends JobIntentService {
     protected void onHandleWork(@NonNull Intent intent) {
         Log.d(TAG, "onHandleWork>>>");
         EventBus.getDefault().post(new ServiceEventConnectedEvent());
-        LocationTracking2 mLocationTracking2 = new LocationTracking2(this);
-        mLocationTracking2.doStartTimer();
+        LocationTracking mLocationTracking = new LocationTracking(this);
+        mLocationTracking.doStartTimer();
 
         try {
             Thread.sleep(Constants.SCHEDULER_TIME_SEC * 1000 + 1000);
