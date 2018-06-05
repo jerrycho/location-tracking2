@@ -27,9 +27,13 @@ import java.util.TimerTask;
 
 import app.mmguardian.com.Constants;
 import app.mmguardian.com.location_tracking.LocationTrackingApplication;
+import app.mmguardian.com.location_tracking.R;
+import app.mmguardian.com.location_tracking.adapter.LocationAdatper;
 import app.mmguardian.com.location_tracking.bus.NewLocationTrackingRecordEvent;
 import app.mmguardian.com.location_tracking.bus.RemainTimeEvent;
 import app.mmguardian.com.location_tracking.db.model.LocationRecord;
+import app.mmguardian.com.location_tracking.fragment.GoogleMapFragment;
+import io.reactivex.functions.Consumer;
 
 
 public class LocationTracking2 {
@@ -54,6 +58,7 @@ public class LocationTracking2 {
     }
 
     public void doStartTimer(){
+        new AsyncGetRecordSizeFromDBTaskRunner().execute("");
         mTimer.scheduleAtFixedRate(new TimerTask() {
             public void run() {
                 EventBus.getDefault().post(new RemainTimeEvent(setInterval()));
@@ -131,5 +136,20 @@ public class LocationTracking2 {
             return null;
         }
 
+    }
+
+    private class AsyncGetRecordSizeFromDBTaskRunner extends AsyncTask<String, Void, Integer> {
+
+        @Override
+        protected Integer doInBackground(String... params) {
+            return LocationTrackingApplication.getInstance().getLocationDatabase().locationRecordDao().getAll().size();
+        }
+
+        @Override
+        protected void onPostExecute(Integer size) {
+            if (size==0){
+                doGetCurrentLocaiton();
+            }
+        }
     }
 }

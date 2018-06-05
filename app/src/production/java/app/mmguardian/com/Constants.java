@@ -1,7 +1,6 @@
 package app.mmguardian.com;
 
 public class Constants  {
-    public final static int SCHEDULER_TIME = 5 * 60 * 1000;
-
-    public final static int SCHEDULER_TIME_SEC = 60 * 5; //
+    public final static int SCHEDULER_TIME_SEC = 5 * 60; // 60s with 5 mins
+    public final static long RECORD_KEEP = 86400000L; // 1 day
 }
