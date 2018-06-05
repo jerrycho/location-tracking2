@@ -9,30 +9,46 @@
 
     <LinearLayout
         android:padding="10dp"
-        android:orientation="vertical"
+        android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@android:color/white">
 
-        <TextView
-            android:textColor="@android:color/black"
-            android:textSize="14dp"
-            android:id="@+id/tvAddress"
+        <LinearLayout
+            android:layout_weight="1"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-        <TextView
-            android:textColor="@android:color/black"
-            android:textSize="14dp"
-            android:id="@+id/tvLotLong"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <TextView
+                android:textColor="@android:color/black"
+                android:textSize="14dp"
+                android:id="@+id/tvAddress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+            <TextView
+                android:textColor="@android:color/black"
+                android:textSize="14dp"
+                android:id="@+id/tvLotLong"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:textColor="@android:color/darker_gray"
+                android:textSize="12dp"
+                android:id="@+id/tvDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/btnMap"
+            android:text="Map"
+            android:layout_gravity="center"
+            android:gravity="center"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
-        <TextView
-            android:textColor="@android:color/darker_gray"
-            android:textSize="12dp"
-            android:id="@+id/tvDate"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
     </LinearLayout>
 
 </android.support.v7.widget.CardView>

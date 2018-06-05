@@ -1,7 +1,6 @@
 package app.mmguardian.com.location_tracking.adapter;
 
 
-
 import android.icu.text.SimpleDateFormat;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
@@ -9,11 +8,15 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 
+import com.google.android.gms.location.LocationResult;
+
 import java.util.Date;
 import java.util.List;
+import io.reactivex.functions.Consumer;
 
 import app.mmguardian.com.location_tracking.R;
 import app.mmguardian.com.location_tracking.db.model.LocationRecord;
@@ -26,8 +29,14 @@ public class LocationAdatper extends RecyclerView.Adapter<LocationAdatper.ViewHo
 
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
+    Consumer<LocationRecord> onMapClick;
+
     public LocationAdatper( List<LocationRecord> alLocationRecord) {
         this.alLocationRecord = alLocationRecord;
+    }
+
+    public void setOnMapClick(Consumer onMapClick){
+        this.onMapClick = onMapClick;
     }
 
     @Override
@@ -38,7 +47,7 @@ public class LocationAdatper extends RecyclerView.Adapter<LocationAdatper.ViewHo
 
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, int position) {
-        LocationRecord mLocationRecord = alLocationRecord.get(position);
+        final LocationRecord mLocationRecord = alLocationRecord.get(position);
 
         viewHolder.tvDate.setText("Time : " + sdf.format(new Date(mLocationRecord.date)));
         if (TextUtils.isEmpty(mLocationRecord.address)){
@@ -50,13 +59,26 @@ public class LocationAdatper extends RecyclerView.Adapter<LocationAdatper.ViewHo
 
         if (mLocationRecord.isNull){
             viewHolder.tvLotLong.setText("Cannot get location");
+            viewHolder.btnMap.setOnClickListener(null);
         }
         else {
             viewHolder.tvLotLong.setText(
                     "Latitude : " + String.valueOf(mLocationRecord.latitude) + "\n"+
                     "Longitude : " + String.valueOf(mLocationRecord.longitude)
-
             );
+            if (onMapClick!=null){
+                viewHolder.btnMap.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        try {
+                            onMapClick.accept(mLocationRecord);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+            }
+
         }
 
     }
@@ -70,12 +92,14 @@ public class LocationAdatper extends RecyclerView.Adapter<LocationAdatper.ViewHo
         public TextView tvDate;
         public TextView tvAddress;
         public TextView tvLotLong;
+        public Button btnMap;
 
         public ViewHolder(View itemView) {
             super(itemView);
             tvDate = itemView.findViewById(R.id.tvDate);
             tvAddress= itemView.findViewById(R.id.tvAddress);
             tvLotLong = itemView.findViewById(R.id.tvLotLong);
+            btnMap = itemView.findViewById(R.id.btnMap);
         }
     }
 

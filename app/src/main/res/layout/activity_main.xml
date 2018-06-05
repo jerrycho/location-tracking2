@@ -1,64 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/fragmentContainer"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/llLoading"
-        android:orientation="vertical"
-        android:padding="13dp"
-        android:layout_centerHorizontal="true"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <TextView
-            android:layout_width="wrap_content"
-            android:text="Waiting connection to get location:"
-            android:textAppearance="?android:textAppearanceSmall"
-            android:layout_gravity="center_vertical"
-            android:id="@+id/loading_msg"
-            android:layout_toEndOf="@+id/loader"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"/>
-        <ProgressBar
-            android:id="@+id/loader"
-            style="?android:attr/progressBarStyleHorizontal"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/llLoading"
+            android:orientation="vertical"
+            android:padding="13dp"
+            android:layout_centerHorizontal="true"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:layout_width="wrap_content"
+                android:text="Waiting connection to get location:"
+                android:textAppearance="?android:textAppearanceSmall"
+                android:layout_gravity="center_vertical"
+                android:id="@+id/loading_msg"
+                android:layout_toEndOf="@+id/loader"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"/>
+            <ProgressBar
+                android:id="@+id/loader"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:indeterminate="true"
+                android:max="100"
+                android:layout_below="@+id/framelauout"
+                android:indeterminateTint="#1a09d6"
+                android:layout_marginTop="-7dp"/>
+        </LinearLayout>
+        <LinearLayout
+            android:padding="10dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:indeterminate="true"
-            android:max="100"
-            android:layout_below="@+id/framelauout"
-            android:indeterminateTint="#1a09d6"
-            android:layout_marginTop="-7dp"/>
+            android:orientation="horizontal">
+            <TextView
+                android:textSize="15dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Permission Status : "/>
+            <CheckBox
+                android:enabled="false"
+                android:id="@+id/cbHaveRight"
+                android:layout_marginLeft="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+            <TextView
+                android:textSize="15dp"
+                android:layout_marginLeft="10dp"
+                android:id="@+id/tvCountDownTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="--"/>
+        </LinearLayout>
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/rcvLocationRecord"
+            android:layout_weight="1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
     </LinearLayout>
-    <LinearLayout
-        android:padding="10dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-        <TextView
-            android:textSize="15dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Permission Status : "/>
-        <CheckBox
-            android:enabled="false"
-            android:id="@+id/cbHaveRight"
-            android:layout_marginLeft="10dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-        <TextView
-            android:textSize="15dp"
-            android:layout_marginLeft="10dp"
-            android:id="@+id/tvCountDownTime"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="--"/>
-    </LinearLayout>
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/rcvLocationRecord"
-        android:layout_weight="1"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
-</LinearLayout>
+</FrameLayout>
 
 

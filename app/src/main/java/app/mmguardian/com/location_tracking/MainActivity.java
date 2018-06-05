@@ -28,7 +28,10 @@ import app.mmguardian.com.location_tracking.bus.NewLocationTrackingRecordEvent;
 import app.mmguardian.com.location_tracking.bus.RemainTimeEvent;
 import app.mmguardian.com.location_tracking.bus.ServiceEventConnectedEvent;
 import app.mmguardian.com.location_tracking.db.model.LocationRecord;
+import app.mmguardian.com.location_tracking.fragment.GoogleMapFragment;
 import app.mmguardian.com.location_tracking.service.LocationJobIntentService;
+import app.mmguardian.com.location_tracking.utils.FragmentUtils;
+import io.reactivex.functions.Consumer;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
@@ -164,6 +167,15 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         @Override
         protected void onPostExecute(List<LocationRecord> locationRecords) {
             mAdapter = new LocationAdatper(locationRecords);
+            mAdapter.setOnMapClick(new Consumer<LocationRecord>() {
+                @Override
+                public void accept(@io.reactivex.annotations.NonNull LocationRecord locationRecordRecord) throws Exception {
+                    FragmentUtils.addFragment(getSupportFragmentManager(),
+                            GoogleMapFragment.newInstance(locationRecordRecord.latitude, locationRecordRecord.longitude),
+                            R.id.fragmentContainer,
+                            Boolean.TRUE, FragmentUtils.TRANSITION_LEFT_RIGHT);
+                }
+            });
             rcvLocationRecord.setAdapter(mAdapter);
         }
     }
@@ -172,4 +184,6 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
     private String displayHHMMSSBySec(long secs) {
         return "Update remain : " + String.format("%02d:%02d:%02d", (secs % 86400) / 3600, (secs % 3600) / 60, secs % 60);
     }
+
+
 }
