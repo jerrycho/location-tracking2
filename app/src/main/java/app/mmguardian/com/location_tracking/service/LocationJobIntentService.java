@@ -31,7 +31,7 @@ public class LocationJobIntentService extends JobIntentService {
         mLocationTracking.doStartTimer();
 
         try {
-            Thread.sleep(Constants.SCHEDULER_TIME_SEC * 1000 + 1000);
+            Thread.sleep(Constants.SCHEDULER_TIME_SEC * 1000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

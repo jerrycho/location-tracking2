@@ -27,13 +27,9 @@ import java.util.TimerTask;
 
 import app.mmguardian.com.Constants;
 import app.mmguardian.com.location_tracking.LocationTrackingApplication;
-import app.mmguardian.com.location_tracking.R;
-import app.mmguardian.com.location_tracking.adapter.LocationAdatper;
 import app.mmguardian.com.location_tracking.bus.NewLocationTrackingRecordEvent;
 import app.mmguardian.com.location_tracking.bus.RemainTimeEvent;
 import app.mmguardian.com.location_tracking.db.model.LocationRecord;
-import app.mmguardian.com.location_tracking.fragment.GoogleMapFragment;
-import io.reactivex.functions.Consumer;
 
 
 public class LocationTracking {
@@ -58,7 +54,7 @@ public class LocationTracking {
     }
 
     public void doStartTimer(){
-        new AsyncGetRecordSizeFromDBTaskRunner().execute("");
+        new AsyncGetCurrentLocationTaskRunner().execute("");
         mTimer.scheduleAtFixedRate(new TimerTask() {
             public void run() {
                 EventBus.getDefault().post(new RemainTimeEvent(setInterval()));
@@ -69,7 +65,7 @@ public class LocationTracking {
 
     private int setInterval() {
         if (mInterval == 1) {
-            doGetCurrentLocaiton();
+            //doGetCurrentLocaiton();
             if (mTimer!=null) {
                 mTimer.cancel();
                 mTimer = null;
@@ -78,7 +74,7 @@ public class LocationTracking {
         return mInterval--;
     }
 
-    private void doGetCurrentLocaiton() {
+    public void doGetCurrentLocaiton() {
         Log.d(TAG, "doGetCurrentLocaiton0 :" );
         if (mFusedLocationProviderClient == null) {
             mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context);
@@ -138,18 +134,16 @@ public class LocationTracking {
 
     }
 
-    private class AsyncGetRecordSizeFromDBTaskRunner extends AsyncTask<String, Void, Integer> {
+    private class AsyncGetCurrentLocationTaskRunner extends AsyncTask<String, Void, Integer> {
 
         @Override
         protected Integer doInBackground(String... params) {
-            return LocationTrackingApplication.getInstance().getLocationDatabase().locationRecordDao().getAll().size();
+            return 0;
         }
 
         @Override
         protected void onPostExecute(Integer size) {
-            if (size==0){
-                doGetCurrentLocaiton();
-            }
+            doGetCurrentLocaiton();
         }
     }
 }
