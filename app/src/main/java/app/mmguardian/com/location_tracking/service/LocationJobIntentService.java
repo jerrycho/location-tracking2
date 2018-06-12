@@ -18,14 +18,14 @@ public class LocationJobIntentService extends JobIntentService {
     public static final int JOB_ID = 0x01;
 
     public static void enqueueWork(Context context, Intent work) {
-        Log.d(TAG, "enqueueWork");
+        app.mmguardian.com.location_tracking.log.AppLog.d("enqueueWork");
         enqueueWork(context, LocationJobIntentService.class, JOB_ID, work);
     }
 
 
     @Override
     protected void onHandleWork(@NonNull Intent intent) {
-        Log.d(TAG, "onHandleWork>>>");
+        app.mmguardian.com.location_tracking.log.AppLog.d("onHandleWork>>>");
         EventBus.getDefault().post(new ServiceEventConnectedEvent());
         LocationTracking mLocationTracking = new LocationTracking(this);
         mLocationTracking.doStartTimer();
@@ -40,7 +40,7 @@ public class LocationJobIntentService extends JobIntentService {
 
     @Override
     public void onDestroy() {
-        Log.d(TAG, "on LocationJobIntentService Destory");
+        app.mmguardian.com.location_tracking.log.AppLog.d("on LocationJobIntentService Destory");
         LocationJobIntentService.enqueueWork(this, new Intent());
         super.onDestroy();
     }

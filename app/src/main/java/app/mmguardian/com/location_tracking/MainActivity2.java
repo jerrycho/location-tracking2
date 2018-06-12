@@ -34,6 +34,7 @@ import app.mmguardian.com.location_tracking.db.model.LocationRecord;
 import app.mmguardian.com.location_tracking.fragment.GoogleMapFragment;
 import app.mmguardian.com.location_tracking.service.LocationJobIntentService;
 import app.mmguardian.com.location_tracking.service.TrackingService;
+import app.mmguardian.com.location_tracking.service.TrackingService2;
 import app.mmguardian.com.location_tracking.utils.FragmentUtils;
 import app.mmguardian.com.location_tracking.utils.Util;
 import io.reactivex.functions.Consumer;
@@ -95,14 +96,14 @@ public class MainActivity2 extends AppCompatActivity implements EasyPermissions.
     ServiceConnection mConnection = new ServiceConnection() {
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            Log.d(TAG, "onServiceDisconnected>>>");
+            app.mmguardian.com.location_tracking.log.AppLog.d("onServiceDisconnected>>>");
             mBounded = false;
             mTrackingService = null;
         }
 
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            Log.d(TAG, "onServiceConnected>>>");
+            app.mmguardian.com.location_tracking.log.AppLog.d("onServiceConnected>>>");
             mBounded = true;
             TrackingService.LocalBinder mLocalBinder = (TrackingService.LocalBinder)service;
             mTrackingService = mLocalBinder.getServerInstance();
@@ -113,7 +114,7 @@ public class MainActivity2 extends AppCompatActivity implements EasyPermissions.
     @Override
     protected void onStop() {
         super.onStop();
-        Log.d(TAG, "on mBounded");
+        app.mmguardian.com.location_tracking.log.AppLog.d("on stop");
         if(mBounded) {
             unbindService(mConnection);
             mBounded = false;
@@ -167,7 +168,7 @@ public class MainActivity2 extends AppCompatActivity implements EasyPermissions.
 
     @Override
     protected void onDestroy() {
-        Log.d(TAG, "MainActivity onDestory");
+        app.mmguardian.com.location_tracking.log.AppLog.d("MainActivity onDestory");
         EventBus.getDefault().unregister(this);
         super.onDestroy();
     }
@@ -191,7 +192,7 @@ public class MainActivity2 extends AppCompatActivity implements EasyPermissions.
 
         mAdapter.add(0, event.getmLocationRecord());
 
-        Log.d(TAG, "onNewLocationTrackingRecordEvent >>" +mAdapter.getItemCount());
+        app.mmguardian.com.location_tracking.log.AppLog.d("onNewLocationTrackingRecordEvent >>" +mAdapter.getItemCount());
         mAdapter.notifyItemInserted(0);
         rcvLocationRecord.smoothScrollToPosition(0);
     }
@@ -211,7 +212,7 @@ public class MainActivity2 extends AppCompatActivity implements EasyPermissions.
         @Override
         protected List<LocationRecord> doInBackground(Void... params) {
             mLocationRecords = LocationTrackingApplication.getInstance().getLocationDatabase().locationRecordDao().getAll();
-            Log.d(TAG, "SIZE>>> " + String.valueOf(mLocationRecords.size()));
+            app.mmguardian.com.location_tracking.log.AppLog.d("SIZE>>> " + String.valueOf(mLocationRecords.size()));
             return mLocationRecords;
         }
 

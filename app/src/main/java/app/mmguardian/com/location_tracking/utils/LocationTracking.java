@@ -30,6 +30,7 @@ import app.mmguardian.com.location_tracking.LocationTrackingApplication;
 import app.mmguardian.com.location_tracking.bus.NewLocationTrackingRecordEvent;
 import app.mmguardian.com.location_tracking.bus.RemainTimeEvent;
 import app.mmguardian.com.location_tracking.db.model.LocationRecord;
+import app.mmguardian.com.location_tracking.log.AppLog;
 
 
 public class LocationTracking {
@@ -75,7 +76,7 @@ public class LocationTracking {
     }
 
     public void doGetCurrentLocaiton() {
-        Log.d(TAG, "doGetCurrentLocaiton0 :" );
+        AppLog.d( "doGetCurrentLocaiton0 :" );
         if (mFusedLocationProviderClient == null) {
             mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context);
         }
@@ -108,6 +109,8 @@ public class LocationTracking {
                 address = "Network service not available";
             } catch (IllegalArgumentException illegalArgumentException) {
                 address = "Invalid Latitude & Longitude";
+            } catch (Exception exception) {
+                address = "Null Latitude & Longitude";
             }
 
             if (addresses == null || addresses.size() ==0){

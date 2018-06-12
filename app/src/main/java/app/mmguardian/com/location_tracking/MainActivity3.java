@@ -138,7 +138,8 @@ public class MainActivity3 extends AppCompatActivity implements EasyPermissions.
 
     @Override
     protected void onDestroy() {
-        Log.d(TAG, "MainActivity onDestory");
+        app.mmguardian.com.location_tracking.log.AppLog.d("MainActivity onDestory");
+        stopService(new Intent(this, TrackingService2.class));
         EventBus.getDefault().unregister(this);
         super.onDestroy();
     }
@@ -146,20 +147,20 @@ public class MainActivity3 extends AppCompatActivity implements EasyPermissions.
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onNewLocationTrackingRecordEvent(NewLocationTrackingRecordEvent event) {
-
-        if (mAdapter.getItemCount() > 0 &&
-                mAdapter.getItemByPosition(mAdapter.getItemCount() - 1).date <event.getBeforeDate()){
-            int position = mLocationRecords.size()-1;
-            mAdapter.remove(position);
-            mAdapter.notifyItemRemoved(position);
-        }
-
-
-        mAdapter.add(0, event.getmLocationRecord());
-
-        Log.d(TAG, "onNewLocationTrackingRecordEvent >>" +mAdapter.getItemCount());
-        mAdapter.notifyItemInserted(0);
-        rcvLocationRecord.smoothScrollToPosition(0);
+        new AsyncGetRecordFromDBTaskRunner().execute();
+//        if (mAdapter.getItemCount() > 0 &&
+//                mAdapter.getItemByPosition(mAdapter.getItemCount() - 1).date <event.getBeforeDate()){
+//            int position = mLocationRecords.size()-1;
+//            mAdapter.remove(position);
+//            mAdapter.notifyItemRemoved(position);
+//        }
+//
+//
+//        mAdapter.add(0, event.getmLocationRecord());
+//
+//        app.mmguardian.com.location_tracking.log.AppLog.d("onNewLocationTrackingRecordEvent >>" +mAdapter.getItemCount());
+//        mAdapter.notifyItemInserted(0);
+//        rcvLocationRecord.smoothScrollToPosition(0);
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -177,7 +178,7 @@ public class MainActivity3 extends AppCompatActivity implements EasyPermissions.
         @Override
         protected List<LocationRecord> doInBackground(Void... params) {
             mLocationRecords = LocationTrackingApplication.getInstance().getLocationDatabase().locationRecordDao().getAll();
-            Log.d(TAG, "SIZE>>> " + String.valueOf(mLocationRecords.size()));
+            app.mmguardian.com.location_tracking.log.AppLog.d("SIZE>>> " + String.valueOf(mLocationRecords.size()));
             return mLocationRecords;
         }
 

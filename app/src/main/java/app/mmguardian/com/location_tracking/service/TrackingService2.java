@@ -1,10 +1,12 @@
 package app.mmguardian.com.location_tracking.service;
 
+import android.app.Notification;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
@@ -19,6 +21,7 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import app.mmguardian.com.Constants;
 import app.mmguardian.com.location_tracking.bus.ServiceEventConnectedEvent;
+import app.mmguardian.com.location_tracking.log.AppLog;
 import app.mmguardian.com.location_tracking.utils.LocationTracking;
 
 
@@ -45,6 +48,9 @@ public class TrackingService2 extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        startForeground(1,new Notification());
+
         final IntentFilter theFilter = new IntentFilter();
         theFilter.addAction(ACTION);
         this.startTimerReceiver = new BroadcastReceiver() {
@@ -62,7 +68,7 @@ public class TrackingService2 extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
-        Log.d(TAG, "[TrackingService] onStartCommand");
+        AppLog.d("[TrackingService] onStartCommand");
 
         if (mScheduledExecutorService==null){
             mScheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
@@ -91,6 +97,7 @@ public class TrackingService2 extends Service {
             mTimer.cancel();
             mTimer = null;
         }
+
     }
 
     private void initTimerTask() {
@@ -106,11 +113,28 @@ public class TrackingService2 extends Service {
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
-        Log.d(TAG, "onDestroy");
-        this.unregisterReceiver(this.startTimerReceiver);
-        Intent broadcastIntent = new Intent("app.mmguardian.com.location_tracking.RestartSensor");
-        sendBroadcast(broadcastIntent);
+
+        AppLog.d( "onDestroy >>>");
         doStopTimer();
+        this.unregisterReceiver(this.startTimerReceiver);
+        Intent broadcastIntent = new Intent();
+        Context c = null;
+        try {
+            c = createPackageContext("app.mmguardian.com.location_tracking.debug", Context.CONTEXT_INCLUDE_CODE | Context.CONTEXT_IGNORE_SECURITY);
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+            Log.d(TAG, "onDestroy >>>" + e.toString());
+        }
+
+        broadcastIntent.setClassName(c, "app.mmguardian.com.location_tracking.receiver.SensorRestarterBroadcastReceiver");
+        broadcastIntent.setAction("app.mmguardian.com.location_tracking.RestartSensor");
+        broadcastIntent.setFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
+        sendBroadcast(broadcastIntent);
+
+
+
+
+
+        super.onDestroy();
     }
 }
