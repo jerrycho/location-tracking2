@@ -4,11 +4,11 @@ import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.Index;
 import android.arch.persistence.room.PrimaryKey;
-import android.icu.text.SimpleDateFormat;
-import android.icu.util.Calendar;
+
 import android.location.Location;
 
 
+import java.util.Calendar;
 import java.util.Date;
 
 @Entity(indices = {@Index(value = "id", unique = true)})

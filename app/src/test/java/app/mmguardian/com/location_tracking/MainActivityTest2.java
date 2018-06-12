@@ -1,19 +1,28 @@
 package app.mmguardian.com.location_tracking;
 
 
-import android.Manifest;
-import android.content.Intent;
+import android.arch.core.executor.testing.InstantTaskExecutorRule;
+import android.arch.persistence.room.Room;
+import android.content.Context;
+import android.location.Location;
 import android.widget.TextView;
 
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 
-import app.mmguardian.com.Constants;
-import app.mmguardian.com.location_tracking.service.LocationJobIntentService;
+import app.mmguardian.com.location_tracking.db.LocationDatabase;
+import app.mmguardian.com.location_tracking.db.model.LocationRecord;
+import app.mmguardian.com.location_tracking.service.TrackingService;
+import app.mmguardian.com.location_tracking.utils.Util;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MainActivityTest2 {
@@ -21,10 +30,31 @@ public class MainActivityTest2 {
     @Mock
     MainActivity mainActivity;
 
+    @Mock
+    Location location;
+
+    @Mock
+    android.database.sqlite.SQLiteOpenHelper mSQLiteOpenHelper;
+
+    @Rule
+    public TestRule rule = new InstantTaskExecutorRule();
+
+
+    private LocationDatabase mLocationDatabase;
+    //private TodoDao dao;
+
     TextView tvCountDownTime;
+
+    @InjectMocks
+    private TrackingService mTrackingService;
 
     @Before
     public void setup(){
+        MockitoAnnotations.initMocks(this);
+
+        mLocationDatabase = Room.inMemoryDatabaseBuilder(mainActivity, LocationDatabase.class)
+                .allowMainThreadQueries().build();
+
         tvCountDownTime = mainActivity.findViewById(R.id.tvCountDownTime);
     }
 
@@ -35,14 +65,23 @@ public class MainActivityTest2 {
     }
 
     @Test
-    public void testAfterStartService(){
-        mainActivity.doStartService();
-        TextView tvCountDownTime = mainActivity.findViewById(R.id.tvCountDownTime);
-        Assert.assertEquals(mainActivity.tvCountDownTime.getText(), "00:00:05");
+    public void testInsert(){
+        //Location location = new Location("testing");
+        location.setAltitude(1.0);
+        location.setLatitude(1.0);
+        location.setLongitude(1.0);
 
-//        cbHaveRight.setChecked(Boolean.TRUE);
-//        LocationJobIntentService.enqueueWork(MainActivity.this, new Intent());
-//
-//        Assert.assertEquals(false, havePermission);
+        LocationRecord record = new LocationRecord(location, "testing address");
+        mLocationDatabase.locationRecordDao().insertLocationRecord(record);
+
+        int recordCount = mLocationDatabase.locationRecordDao().getAll().size();
+        Assert.assertEquals(1, recordCount);
     }
+
+    @After
+    public void tearDown() throws Exception {
+        mLocationDatabase.close();
+    }
+
+
 }

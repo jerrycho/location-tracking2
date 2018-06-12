@@ -1,28 +1,30 @@
 package app.mmguardian.com.location_tracking.service;
 
+import android.app.Notification;
 import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
-import android.os.Binder;
+import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
-
-import org.greenrobot.eventbus.EventBus;
 
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import app.mmguardian.com.Constants;
-import app.mmguardian.com.location_tracking.bus.ServiceEventConnectedEvent;
+import app.mmguardian.com.location_tracking.log.AppLog;
 import app.mmguardian.com.location_tracking.utils.LocationTracking;
 
 
 public class TrackingService extends Service {
 
     public final static String TAG = "location_tracking";
+    public static final String ACTION="app.mmguardian.com.location_tracking.StartTimer";
 
     ScheduledExecutorService mScheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
 
@@ -31,37 +33,50 @@ public class TrackingService extends Service {
 
     private boolean isStartedTimer = false;
 
-    IBinder mBinder = new LocalBinder();
-
-    public class LocalBinder extends Binder {
-        public TrackingService getServerInstance() {
-            return TrackingService.this;
-        }
-    }
+    BroadcastReceiver startTimerReceiver;
 
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        return mBinder;
+        return null;
     }
 
+    @Override
+    public void onCreate() {
+        super.onCreate();
 
+        startForeground(1,new Notification());
+
+        final IntentFilter theFilter = new IntentFilter();
+        theFilter.addAction(ACTION);
+        this.startTimerReceiver = new BroadcastReceiver() {
+
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                doStartTimer();
+            }
+        };
+        // Registers the receiver so that your service will listen for
+        // broadcasts
+        this.registerReceiver(this.startTimerReceiver, theFilter);
+    }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
-        Log.d(TAG, "[TrackingService] onStartCommand");
+        AppLog.d("[TrackingService] onStartCommand");
 
         if (mScheduledExecutorService==null){
             mScheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
         }
+
+        doStartTimer();
 
         return START_STICKY;
     }
 
     public void doStartTimer() {
         if (!isStartedTimer) {
-            EventBus.getDefault().post(new ServiceEventConnectedEvent());
             LocationTracking mLocationTracking = new LocationTracking(TrackingService.this);
             mLocationTracking.doStartTimer();
 
@@ -78,6 +93,7 @@ public class TrackingService extends Service {
             mTimer.cancel();
             mTimer = null;
         }
+
     }
 
     private void initTimerTask() {
@@ -93,10 +109,22 @@ public class TrackingService extends Service {
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
-        Log.d(TAG, "onDestroy");
-        Intent broadcastIntent = new Intent("app.mmguardian.com.location_tracking.RestartSensor");
-        sendBroadcast(broadcastIntent);
+        AppLog.d( "onDestroy >>>");
         doStopTimer();
+        this.unregisterReceiver(this.startTimerReceiver);
+        Intent broadcastIntent = new Intent();
+        Context c = null;
+        try {
+            c = createPackageContext("app.mmguardian.com.location_tracking", Context.CONTEXT_INCLUDE_CODE | Context.CONTEXT_IGNORE_SECURITY);
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+            Log.d(TAG, "onDestroy >>>" + e.toString());
+        }
+
+        broadcastIntent.setClassName(c, "app.mmguardian.com.location_tracking.receiver.SensorRestarterBroadcastReceiver");
+        broadcastIntent.setAction("app.mmguardian.com.location_tracking.RestartSensor");
+        broadcastIntent.setFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
+        sendBroadcast(broadcastIntent);
+        super.onDestroy();
     }
 }

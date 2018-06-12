@@ -14,10 +14,10 @@ android {
     }
     productFlavors {
         stage {
-            applicationId = "app.mmguardian.com.location_tracking.debug"
+
         }
         production {
-            applicationId = "app.mmguardian.com.location_tracking"
+
         }
     }
     buildTypes {
@@ -40,6 +40,14 @@ dependencies {
 
     testCompile 'junit:junit:4.12'
     testCompile "org.mockito:mockito-core:2.+"
+
+    androidTestCompile 'org.mockito:mockito-android:2.+'
+
+    // Test helpers for LiveData
+    testCompile "android.arch.core:core-testing:1.0.0"
+
+    // Test helpers for Room
+    testCompile "android.arch.persistence.room:testing:1.0.0"
 
     compile 'com.google.android.gms:play-services-location:11.8.0'
     compile 'com.google.android.gms:play-services-maps:11.8.0'
