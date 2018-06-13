@@ -12,8 +12,6 @@ import android.widget.Button;
 import android.widget.TextView;
 
 
-import com.google.android.gms.location.LocationResult;
-
 import java.util.Date;
 import java.util.List;
 import io.reactivex.functions.Consumer;
@@ -21,9 +19,13 @@ import io.reactivex.functions.Consumer;
 import app.mmguardian.com.location_tracking.R;
 import app.mmguardian.com.location_tracking.db.model.LocationRecord;
 
+/**
+ * Adapter of recycleview, shown the location information, like address, Latitude and Longitude
+ *
+ * @author  Jerry Cho
+ * @version 1.0
+ */
 public class LocationAdatper extends RecyclerView.Adapter<LocationAdatper.ViewHolder>{
-
-    public static final String TAG = "location_tracking";
 
     List<LocationRecord> alLocationRecord;
 

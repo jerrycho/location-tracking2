@@ -32,10 +32,14 @@ import app.mmguardian.com.location_tracking.bus.RemainTimeEvent;
 import app.mmguardian.com.location_tracking.db.model.LocationRecord;
 import app.mmguardian.com.location_tracking.log.AppLog;
 
+/**
+ * Get current location class, will broadcast current location information to other component
+ *
+ * @author  Jerry Cho
+ * @version 1.0
+ */
 
 public class LocationTracking {
-
-    public final static String TAG = "location_tracking";
 
     Context context;
 
@@ -75,6 +79,9 @@ public class LocationTracking {
         return mInterval--;
     }
 
+    /**
+     * This method is used to get current location information
+     */
     public void doGetCurrentLocaiton() {
         AppLog.d( "doGetCurrentLocaiton0 :" );
         if (mFusedLocationProviderClient == null) {
@@ -92,6 +99,9 @@ public class LocationTracking {
                 });
     }
 
+    /**
+     * This method is used to a insert a new location record into DB
+     */
     private class AsyncInsertDBTaskRunner extends AsyncTask<Location, Void, Void> {
         @Override
         protected Void doInBackground(Location... params) {

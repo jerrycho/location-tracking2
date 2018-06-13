@@ -10,14 +10,18 @@ import app.mmguardian.com.location_tracking.service.TrackingService;
 
 import static android.os.Build.*;
 
-public class SensorRestarterBroadcastReceiver extends BroadcastReceiver{
-
-    public final static String TAG = "location_tracking";
+/**
+ * The Receiver, when receive message, to restart the TrackingService
+ *
+ * @author  Jerry Cho
+ * @version 1.0
+ */
+public class ServiceRequestRestartBroadcastReceiver extends BroadcastReceiver{
 
     @Override
     public void onReceive(Context context, Intent intent) {
         //start the service
-        AppLog.d("onReceive SensorRestarterBroadcastReceiver");
+        AppLog.d("onReceive ServiceRequestRestartBroadcastReceiver");
         Intent i = new Intent(context,TrackingService.class);
 
         if (VERSION.SDK_INT >= VERSION_CODES.O) {

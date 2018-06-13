@@ -8,7 +8,12 @@ import java.util.List;
 
 import app.mmguardian.com.location_tracking.R;
 
-
+/**
+ * Control Fragment enter from where, like left or right
+ *
+ * @author  Jerry Cho
+ * @version 1.0
+ */
 public class FragmentUtils {
 	public static final String TAG = "FragmentUtils";
 	public static final int TRANSITION_NULL = 0;

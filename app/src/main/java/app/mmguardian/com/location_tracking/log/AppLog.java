@@ -6,6 +6,12 @@ import android.util.Log;
 
 import app.mmguardian.com.location_tracking.BuildConfig;
 
+/**
+ * The Application Log, special Sony F3116 is not support Log.d
+ *
+ * @author  Jerry Cho
+ * @version 1.0
+ */
 public class AppLog {
 
     private static final String TAG = "location_tracking";

@@ -18,6 +18,12 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import app.mmguardian.com.location_tracking.R;
 
+/**
+ * Google map fragment, show marker base on passed latitude and longitude
+ *
+ * @author  Jerry Cho
+ * @version 1.0
+ */
 public class GoogleMapFragment extends Fragment implements OnMapReadyCallback {
 
     public static final String EXTRA_LATITUDE = "EXTRA_LATITUDE";

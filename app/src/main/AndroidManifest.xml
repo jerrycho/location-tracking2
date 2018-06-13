@@ -30,12 +30,12 @@
         </activity>
 
         <receiver
-            android:name=".receiver.SensorRestarterBroadcastReceiver"
+            android:name=".receiver.ServiceRequestRestartBroadcastReceiver"
             android:enabled="true"
             android:exported="true"
             android:label="RestartServiceWhenStopped">
             <intent-filter>
-                <action android:name="app.mmguardian.com.location_tracking.RestartSensor"/>
+                <action android:name="app.mmguardian.com.location_tracking.ServiceRequestRestart"/>
             </intent-filter>
         </receiver>
 

@@ -20,13 +20,17 @@ import app.mmguardian.com.Constants;
 import app.mmguardian.com.location_tracking.log.AppLog;
 import app.mmguardian.com.location_tracking.utils.LocationTracking;
 
-
+/**
+ * The Android service, when started service, service will auto loop by period to get the current
+ * location
+ *
+ * @author  Jerry Cho
+ * @version 1.0
+ */
 public class TrackingService extends Service {
 
     public final static String TAG = "location_tracking";
     public static final String ACTION="app.mmguardian.com.location_tracking.StartTimer";
-
-    ScheduledExecutorService mScheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
 
     private Timer mTimer;
     private TimerTask mTimerTask;
@@ -65,13 +69,7 @@ public class TrackingService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
         AppLog.d("[TrackingService] onStartCommand");
-
-        if (mScheduledExecutorService==null){
-            mScheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
-        }
-
         doStartTimer();
-
         return START_STICKY;
     }
 
@@ -121,8 +119,8 @@ public class TrackingService extends Service {
             Log.d(TAG, "onDestroy >>>" + e.toString());
         }
 
-        broadcastIntent.setClassName(c, "app.mmguardian.com.location_tracking.receiver.SensorRestarterBroadcastReceiver");
-        broadcastIntent.setAction("app.mmguardian.com.location_tracking.RestartSensor");
+        broadcastIntent.setClassName(c, "app.mmguardian.com.location_tracking.receiver.ServiceRequestRestartBroadcastReceiver");
+        broadcastIntent.setAction("app.mmguardian.com.location_tracking.ServiceRequestRestart");
         broadcastIntent.setFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
         sendBroadcast(broadcastIntent);
         super.onDestroy();

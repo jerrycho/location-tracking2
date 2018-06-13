@@ -9,8 +9,13 @@ import android.location.Location;
 
 
 import java.util.Calendar;
-import java.util.Date;
 
+/**
+ * Room DB class of location, stored a locaiton information
+ *
+ * @author  Jerry Cho
+ * @version 1.0
+ */
 @Entity(indices = {@Index(value = "id", unique = true)})
 public class LocationRecord {
 

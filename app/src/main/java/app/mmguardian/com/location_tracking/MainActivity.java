@@ -35,7 +35,12 @@ import io.reactivex.functions.Consumer;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
-
+/**
+ * The Main page of app. It will the exiting location information on the list.
+ *
+ * @author  Jerry Cho
+ * @version 1.0
+ */
 public class MainActivity extends AppCompatActivity implements EasyPermissions.PermissionCallbacks {
 
     public final static String TAG = "location_tracking";
@@ -143,19 +148,6 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onNewLocationTrackingRecordEvent(NewLocationTrackingRecordEvent event) {
         new AsyncGetRecordFromDBTaskRunner().execute();
-//        if (mAdapter.getItemCount() > 0 &&
-//                mAdapter.getItemByPosition(mAdapter.getItemCount() - 1).date <event.getBeforeDate()){
-//            int position = mLocationRecords.size()-1;
-//            mAdapter.remove(position);
-//            mAdapter.notifyItemRemoved(position);
-//        }
-//
-//
-//        mAdapter.add(0, event.getmLocationRecord());
-//
-//        app.mmguardian.com.location_tracking.log.AppLog.d("onNewLocationTrackingRecordEvent >>" +mAdapter.getItemCount());
-//        mAdapter.notifyItemInserted(0);
-//        rcvLocationRecord.smoothScrollToPosition(0);
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)

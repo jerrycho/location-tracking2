@@ -5,6 +5,12 @@ import android.arch.persistence.room.Room;
 
 import app.mmguardian.com.location_tracking.db.LocationDatabase;
 
+/**
+ * The Main application class
+ *
+ * @author  Jerry Cho
+ * @version 1.0
+ */
 public class LocationTrackingApplication extends Application {
 
     private static LocationTrackingApplication instance;
