@@ -25,7 +25,7 @@ import app.mmguardian.com.location_tracking.service.TrackingService;
 import app.mmguardian.com.location_tracking.utils.Util;
 
 @RunWith(MockitoJUnitRunner.class)
-public class MainActivityTest2 {
+public class MainActivityTest {
 
     @Mock
     MainActivity mainActivity;
