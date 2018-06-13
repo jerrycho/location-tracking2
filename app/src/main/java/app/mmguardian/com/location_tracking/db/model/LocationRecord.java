@@ -48,4 +48,17 @@ public class LocationRecord {
             this.longitude = location.getLongitude();
         }
     }
+
+    public LocationRecord(boolean isNull, double altitude, double latitude,
+                          double longitude, String address) {
+        this.date = Calendar.getInstance().getTimeInMillis();
+        this.address = address;
+        this.mLocation = null;
+
+        this.isNull = false;
+        this.altitude = altitude;
+        this.latitude = latitude;
+        this.longitude = longitude;
+
+    }
 }
