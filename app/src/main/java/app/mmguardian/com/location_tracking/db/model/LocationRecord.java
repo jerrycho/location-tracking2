@@ -37,8 +37,8 @@ public class LocationRecord {
 
     }
 
-    public LocationRecord(Location location, String address) {
-        this.date = Calendar.getInstance().getTimeInMillis();
+    public LocationRecord(Long currentDatetime, Location location, String address) {
+        this.date = currentDatetime;
         this.address = address;
         this.mLocation = location;
         if (location != null) {

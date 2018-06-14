@@ -71,7 +71,7 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
 
         llLoading.setVisibility(View.VISIBLE);
         cbHaveRight.setChecked(Boolean.FALSE);
-        tvCountDownTime.setText(displayHHMMSSBySec(Constants.SCHEDULER_TIME_SEC));
+        tvCountDownTime.setText("--:--:--");
 
         LinearLayoutManager verticalLinearLayoutManager = new LinearLayoutManager(this);
         verticalLinearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);

@@ -1,22 +1,40 @@
 package app.mmguardian.com.location_tracking.service;
 
+import android.Manifest;
 import android.app.Notification;
 import android.app.Service;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.icu.util.Calendar;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
+import android.os.AsyncTask;
+import android.os.CountDownTimer;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
+import android.text.TextUtils;
 import android.util.Log;
 
-import java.util.Timer;
-import java.util.TimerTask;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
+
+import org.greenrobot.eventbus.EventBus;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import app.mmguardian.com.Constants;
+import app.mmguardian.com.location_tracking.LocationTrackingApplication;
+import app.mmguardian.com.location_tracking.bus.NewLocationTrackingRecordEvent;
+import app.mmguardian.com.location_tracking.bus.RemainTimeEvent;
+import app.mmguardian.com.location_tracking.db.model.LocationRecord;
 import app.mmguardian.com.location_tracking.log.AppLog;
-import app.mmguardian.com.location_tracking.utils.LocationTracking;
+import app.mmguardian.com.location_tracking.utils.PreferenceManager;
 
 /**
  * The Android service, when started service, service will auto loop by period to get the current
@@ -29,11 +47,13 @@ public class TrackingService extends Service {
 
     public final static String TAG = "location_tracking";
 
-    private Timer mTimer;
-    private TimerTask mTimerTask;
-
     private boolean isStartedTimer = false;
+    PreferenceManager mPreferenceManager;
 
+    CountDownTimer mMainCountDownByConstantTimer;
+    CountDownTimer mOneTimeOnlyCountDownTimer;
+    Geocoder mGeocoder;
+    private FusedLocationProviderClient mFusedLocationProviderClient;
 
     @Nullable
     @Override
@@ -51,46 +71,71 @@ public class TrackingService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
         AppLog.d("[TrackingService] onStartCommand");
-        doStartTimer();
+        checkLastRecord();
         return START_STICKY;
     }
 
-    public void doStartTimer() {
+    public void checkLastRecord(){
         if (!isStartedTimer) {
-            LocationTracking mLocationTracking = new LocationTracking(TrackingService.this);
-            mLocationTracking.doStartTimer();
-
             isStartedTimer = true;
-            mTimer = new Timer();
-            initTimerTask();
-            mTimer.schedule(mTimerTask, Constants.SCHEDULER_TIME_SEC * 1000, Constants.SCHEDULER_TIME_SEC * 1000);
-        }
-    }
 
-    public void doStopTimer() {
-        if (mTimer != null) {
-            isStartedTimer = false;
-            mTimer.cancel();
-            mTimer = null;
-        }
+            if (mPreferenceManager == null)
+                mPreferenceManager = new PreferenceManager(this);
 
-    }
+            long lastInsertDate = mPreferenceManager.getLongPref("LAST_INSERT_DATE");
+            if (lastInsertDate == 0) {
+                doStartMainCountDownTimer();
+            } else {
+                int diffSec = (int) ((java.util.Calendar.getInstance().getTime().getTime() - lastInsertDate) / 1000);
+                diffSec = Constants.SCHEDULER_TIME_SEC - diffSec;
+                if (diffSec > 0) {
+                    mOneTimeOnlyCountDownTimer = new CountDownTimer(diffSec * 1000, 1000) {
+                        @Override
+                        public void onTick(long millisUntilFinished) {
+                            EventBus.getDefault().post(new RemainTimeEvent((int) (millisUntilFinished / 1000)));
+                        }
 
-    private void initTimerTask() {
-        mTimerTask = new TimerTask() {
-            @Override
-            public void run() {
-                LocationTracking mLocationTracking = new LocationTracking(TrackingService.this);
-                mLocationTracking.doStartTimer();
+                        @Override
+                        public void onFinish() {
+                            doStartMainCountDownTimer();
+                        }
+                    }.start();
+                } else {
+                    doStartMainCountDownTimer();
+                }
             }
-        };
+        }
     }
 
+    public void doStartMainCountDownTimer() {
+        doGetCurrentLocaiton();
+        mMainCountDownByConstantTimer = new CountDownTimer(Constants.SCHEDULER_TIME_SEC * 1000, 1000) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                EventBus.getDefault().post(new RemainTimeEvent( (int ) (millisUntilFinished / 1000) ));
+            }
+
+            @Override
+            public void onFinish() {
+                doGetCurrentLocaiton();
+                mMainCountDownByConstantTimer.start();
+            }
+        }.start();
+
+    }
+
+    public void doStopMainCountDownTimer(){
+        if (mMainCountDownByConstantTimer!=null){
+            mMainCountDownByConstantTimer.cancel();
+            mMainCountDownByConstantTimer = null;
+            isStartedTimer = false;
+        }
+    }
 
     @Override
     public void onDestroy() {
         AppLog.d( "onDestroy >>>");
-        doStopTimer();
+        doStopMainCountDownTimer();
         Intent broadcastIntent = new Intent();
         Context c = null;
         try {
@@ -105,5 +150,81 @@ public class TrackingService extends Service {
         broadcastIntent.setFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
         sendBroadcast(broadcastIntent);
         super.onDestroy();
+    }
+
+    /**
+     * This method is used to get current location information
+     */
+    public void doGetCurrentLocaiton() {
+        AppLog.d( "doGetCurrentLocaiton0 :" );
+        if (mFusedLocationProviderClient == null) {
+            mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+        }
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        mFusedLocationProviderClient.getLastLocation()
+                .addOnSuccessListener(new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        new AsyncInsertDBTaskRunner().execute(location);
+                    }
+                });
+    }
+
+    /**
+     * This method is used to a insert a new location record into DB
+     */
+    private class AsyncInsertDBTaskRunner extends AsyncTask<Location, Void, Void> {
+        @Override
+        protected Void doInBackground(Location... params) {
+            Location location = params[0];
+            String address = "";
+            List<Address> addresses = null;
+
+            if (mGeocoder==null){
+                mGeocoder = new Geocoder(TrackingService.this);
+            }
+
+            try {
+                addresses = mGeocoder.getFromLocation(
+                        location.getLatitude(),
+                        location.getLongitude(),
+                        // In this sample, get just a single address.
+                        1);
+            } catch (IOException ioException){
+                address = "Network service not available";
+            } catch (IllegalArgumentException illegalArgumentException) {
+                address = "Invalid Latitude & Longitude";
+            } catch (Exception exception) {
+                address = "Null Latitude & Longitude";
+            }
+
+            if (addresses == null || addresses.size() ==0){
+                if (address.isEmpty()){
+                    address = "No address found";
+                }
+            } else {
+                Address address1 = addresses.get(0);
+                ArrayList<String> alAddress = new ArrayList<String>();
+                for(int i = 0; i <= address1.getMaxAddressLineIndex(); i++) {
+                    alAddress.add(address1.getAddressLine(i));
+                }
+                address = TextUtils.join(System.getProperty("line.separator"), alAddress);
+            }
+
+            long currentDatetime = Calendar.getInstance().getTimeInMillis();
+            if (mPreferenceManager==null){
+                mPreferenceManager = new PreferenceManager(TrackingService.this);
+            }
+            mPreferenceManager.setLongPref("LAST_INSERT_DATE", currentDatetime);
+            long beforeDate = currentDatetime - Constants.RECORD_KEEP;
+            LocationTrackingApplication.getInstance().getLocationDatabase().locationRecordDao().deleteBeforeDate(beforeDate - Constants.RECORD_KEEP);
+            LocationRecord mLocationRecord = new LocationRecord(currentDatetime, location, address);
+            LocationTrackingApplication.getInstance().getLocationDatabase().locationRecordDao().insertLocationRecord(mLocationRecord);
+            EventBus.getDefault().post(new NewLocationTrackingRecordEvent(mLocationRecord, beforeDate));
+            return null;
+        }
+
     }
 }
