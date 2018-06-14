@@ -13,8 +13,6 @@ import android.util.Log;
 
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 
 import app.mmguardian.com.Constants;
 import app.mmguardian.com.location_tracking.log.AppLog;
@@ -30,14 +28,12 @@ import app.mmguardian.com.location_tracking.utils.LocationTracking;
 public class TrackingService extends Service {
 
     public final static String TAG = "location_tracking";
-    public static final String ACTION="app.mmguardian.com.location_tracking.StartTimer";
 
     private Timer mTimer;
     private TimerTask mTimerTask;
 
     private boolean isStartedTimer = false;
 
-    BroadcastReceiver startTimerReceiver;
 
     @Nullable
     @Override
@@ -48,21 +44,7 @@ public class TrackingService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-
         startForeground(1,new Notification());
-
-        final IntentFilter theFilter = new IntentFilter();
-        theFilter.addAction(ACTION);
-        this.startTimerReceiver = new BroadcastReceiver() {
-
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                doStartTimer();
-            }
-        };
-        // Registers the receiver so that your service will listen for
-        // broadcasts
-        this.registerReceiver(this.startTimerReceiver, theFilter);
     }
 
     @Override
@@ -109,7 +91,6 @@ public class TrackingService extends Service {
     public void onDestroy() {
         AppLog.d( "onDestroy >>>");
         doStopTimer();
-        this.unregisterReceiver(this.startTimerReceiver);
         Intent broadcastIntent = new Intent();
         Context c = null;
         try {
