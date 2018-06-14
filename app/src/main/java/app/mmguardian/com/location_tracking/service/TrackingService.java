@@ -89,10 +89,10 @@ public class TrackingService extends Service {
                 int diffSec = (int) ((java.util.Calendar.getInstance().getTime().getTime() - lastInsertDate) / 1000);
                 diffSec = Constants.SCHEDULER_TIME_SEC - diffSec;
                 if (diffSec > 0) {
-                    mOneTimeOnlyCountDownTimer = new CountDownTimer(diffSec * 1000, 1000) {
+                    mOneTimeOnlyCountDownTimer = new CountDownTimer(diffSec * 1000 , 1000) {
                         @Override
                         public void onTick(long millisUntilFinished) {
-                            EventBus.getDefault().post(new RemainTimeEvent((int) (millisUntilFinished / 1000)));
+                            EventBus.getDefault().post(new RemainTimeEvent( Math.round(millisUntilFinished * 0.001f) ));
                         }
 
                         @Override
@@ -109,10 +109,11 @@ public class TrackingService extends Service {
 
     public void doStartMainCountDownTimer() {
         doGetCurrentLocaiton();
-        mMainCountDownByConstantTimer = new CountDownTimer(Constants.SCHEDULER_TIME_SEC * 1000, 1000) {
+        mMainCountDownByConstantTimer = new CountDownTimer(Constants.SCHEDULER_TIME_SEC * 1000 , 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
-                EventBus.getDefault().post(new RemainTimeEvent( (int ) (millisUntilFinished / 1000) ));
+
+                EventBus.getDefault().post(new RemainTimeEvent( Math.round(millisUntilFinished * 0.001f) ));
             }
 
             @Override
@@ -227,4 +228,5 @@ public class TrackingService extends Service {
         }
 
     }
+
 }
