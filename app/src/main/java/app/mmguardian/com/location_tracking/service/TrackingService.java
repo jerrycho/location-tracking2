@@ -26,6 +26,7 @@ import org.greenrobot.eventbus.EventBus;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import app.mmguardian.com.Constants;
@@ -35,6 +36,7 @@ import app.mmguardian.com.location_tracking.bus.RemainTimeEvent;
 import app.mmguardian.com.location_tracking.db.model.LocationRecord;
 import app.mmguardian.com.location_tracking.log.AppLog;
 import app.mmguardian.com.location_tracking.utils.PreferenceManager;
+import app.mmguardian.com.location_tracking.utils.Util;
 
 /**
  * The Android service, when started service, service will auto loop by period to get the current
@@ -47,7 +49,7 @@ public class TrackingService extends Service {
 
     public final static String TAG = "location_tracking";
 
-    private boolean isStartedTimer = false;
+    private boolean isTimerRunning = false;
     PreferenceManager mPreferenceManager;
 
     CountDownTimer mMainCountDownByConstantTimer;
@@ -76,22 +78,28 @@ public class TrackingService extends Service {
     }
 
     public void checkLastRecord(){
-        if (!isStartedTimer) {
-            isStartedTimer = true;
+        if (!isTimerRunning) {
 
             if (mPreferenceManager == null)
                 mPreferenceManager = new PreferenceManager(this);
 
             long lastInsertDate = mPreferenceManager.getLongPref("LAST_INSERT_DATE");
+            AppLog.d("lastInsertDate>>>" + new Date(lastInsertDate));
             if (lastInsertDate == 0) {
+                AppLog.d("lastInsertDate is == 0");
                 doStartMainCountDownTimer();
             } else {
+
                 int diffSec = (int) ((java.util.Calendar.getInstance().getTime().getTime() - lastInsertDate) / 1000);
+                AppLog.d("now :" + java.util.Calendar.getInstance().getTime());
+                AppLog.d("diffSec before :" +diffSec);
                 diffSec = Constants.SCHEDULER_TIME_SEC - diffSec;
+                AppLog.d("diffSec after :" +diffSec);
                 if (diffSec > 0) {
                     mOneTimeOnlyCountDownTimer = new CountDownTimer(diffSec * 1000 , 1000) {
                         @Override
                         public void onTick(long millisUntilFinished) {
+                            AppLog.d("[mOneTimeOnlyCountDownTimer] onTick >>" + Math.round(millisUntilFinished * 0.001f));
                             EventBus.getDefault().post(new RemainTimeEvent( Math.round(millisUntilFinished * 0.001f) ));
                         }
 
@@ -112,13 +120,15 @@ public class TrackingService extends Service {
         mMainCountDownByConstantTimer = new CountDownTimer(Constants.SCHEDULER_TIME_SEC * 1000 , 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
-
+                isTimerRunning = true;
+                AppLog.d("[mMainCountDownByConstantTimer] onTick >>" + Math.round(millisUntilFinished * 0.001f));
                 EventBus.getDefault().post(new RemainTimeEvent( Math.round(millisUntilFinished * 0.001f) ));
             }
 
             @Override
             public void onFinish() {
                 doGetCurrentLocaiton();
+                isTimerRunning = false;
                 mMainCountDownByConstantTimer.start();
             }
         }.start();
@@ -129,7 +139,7 @@ public class TrackingService extends Service {
         if (mMainCountDownByConstantTimer!=null){
             mMainCountDownByConstantTimer.cancel();
             mMainCountDownByConstantTimer = null;
-            isStartedTimer = false;
+            isTimerRunning = false;
         }
     }
 
@@ -164,13 +174,18 @@ public class TrackingService extends Service {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
-        mFusedLocationProviderClient.getLastLocation()
-                .addOnSuccessListener(new OnSuccessListener<Location>() {
-                    @Override
-                    public void onSuccess(Location location) {
-                        new AsyncInsertDBTaskRunner().execute(location);
-                    }
-                });
+        if (Util.isNetworkingConnected()) {
+            mFusedLocationProviderClient.getLastLocation()
+                    .addOnSuccessListener(new OnSuccessListener<Location>() {
+                        @Override
+                        public void onSuccess(Location location) {
+                            new AsyncInsertDBTaskRunner().execute(location);
+                        }
+                    });
+        }
+        else {
+            new AsyncInsertDBTaskRunner().execute((Location) null);
+        }
     }
 
     /**
@@ -179,43 +194,51 @@ public class TrackingService extends Service {
     private class AsyncInsertDBTaskRunner extends AsyncTask<Location, Void, Void> {
         @Override
         protected Void doInBackground(Location... params) {
+
             Location location = params[0];
+
             String address = "";
             List<Address> addresses = null;
 
-            if (mGeocoder==null){
-                mGeocoder = new Geocoder(TrackingService.this);
-            }
 
-            try {
-                addresses = mGeocoder.getFromLocation(
-                        location.getLatitude(),
-                        location.getLongitude(),
-                        // In this sample, get just a single address.
-                        1);
-            } catch (IOException ioException){
+            if (location==null){
                 address = "Network service not available";
-            } catch (IllegalArgumentException illegalArgumentException) {
-                address = "Invalid Latitude & Longitude";
-            } catch (Exception exception) {
-                address = "Null Latitude & Longitude";
+            }
+            else {
+                if (mGeocoder == null) {
+                    mGeocoder = new Geocoder(TrackingService.this);
+                }
+
+                try {
+                    addresses = mGeocoder.getFromLocation(
+                            location.getLatitude(),
+                            location.getLongitude(),
+                            // In this sample, get just a single address.
+                            1);
+                } catch (IOException ioException) {
+                    address = "Network service not available";
+                } catch (IllegalArgumentException illegalArgumentException) {
+                    address = "Invalid Latitude & Longitude";
+                } catch (Exception exception) {
+                    address = "Null Latitude & Longitude";
+                }
             }
 
-            if (addresses == null || addresses.size() ==0){
-                if (address.isEmpty()){
+            if (addresses == null || addresses.size() == 0) {
+                if (address.isEmpty()) {
                     address = "No address found";
                 }
             } else {
                 Address address1 = addresses.get(0);
                 ArrayList<String> alAddress = new ArrayList<String>();
-                for(int i = 0; i <= address1.getMaxAddressLineIndex(); i++) {
+                for (int i = 0; i <= address1.getMaxAddressLineIndex(); i++) {
                     alAddress.add(address1.getAddressLine(i));
                 }
                 address = TextUtils.join(System.getProperty("line.separator"), alAddress);
             }
 
             long currentDatetime = Calendar.getInstance().getTimeInMillis();
-            if (mPreferenceManager==null){
+            if (mPreferenceManager == null) {
                 mPreferenceManager = new PreferenceManager(TrackingService.this);
             }
             mPreferenceManager.setLongPref("LAST_INSERT_DATE", currentDatetime);
@@ -224,6 +247,7 @@ public class TrackingService extends Service {
             LocationRecord mLocationRecord = new LocationRecord(currentDatetime, location, address);
             LocationTrackingApplication.getInstance().getLocationDatabase().locationRecordDao().insertLocationRecord(mLocationRecord);
             EventBus.getDefault().post(new NewLocationTrackingRecordEvent(mLocationRecord, beforeDate));
+
             return null;
         }
 
