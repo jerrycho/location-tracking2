@@ -14,7 +14,7 @@ import app.mmguardian.com.location_tracking.BuildConfig;
  */
 public class AppLog {
 
-    private static final String TAG = "location_tracking";
+    public static final String TAG = "location_tracking";
 
     public static void d(String msg) {
         if(BuildConfig.DEBUG) {

@@ -5,7 +5,8 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>
 
 
     <application
@@ -20,7 +21,7 @@
         <meta-data android:name="com.google.android.geo.API_KEY" android:value="AIzaSyCJBWL2USEOW38-k2C1SRQB4sB9QbzHCeQ"/>
 
         <activity
-            android:name=".MainActivity"
+            android:name=".MainActivity2"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -43,6 +44,35 @@
             android:enabled="true"
             android:exported="true"/>
 
+        <service android:name=".service.MyIntentService"/>
+
+        <receiver android:name=".receiver.NotificationPublisher" />
+
+        <!--<receiver-->
+            <!--android:process=":remote"-->
+            <!--android:name=".receiver.AlarmReceiver" />-->
+
+        <receiver
+            android:name=".receiver.ServiceRequestRestartBroadcastReceiver"
+            android:enabled="true"
+            android:exported="true"
+            android:label="RestartServiceWhenStopped">
+            <intent-filter>
+                <action android:name="app.mmguardian.com.location_tracking.ServiceRequestRestart"/>
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".receiver.AlarmReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="app.mmguardian.com.location_tracking.ALARM"/>
+            </intent-filter>
+        </receiver>
+
     </application>
+
+
 
 </manifest>

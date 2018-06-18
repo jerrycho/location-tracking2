@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import app.mmguardian.com.Constants;
 import app.mmguardian.com.location_tracking.LocationTrackingApplication;
@@ -57,6 +58,9 @@ public class TrackingService extends Service {
     Geocoder mGeocoder;
     private FusedLocationProviderClient mFusedLocationProviderClient;
 
+    app.mmguardian.com.location_tracking.utils.CountDownTimer mRXTimer;
+    app.mmguardian.com.location_tracking.utils.CountDownTimer mdiffRXTimer;
+
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
@@ -73,8 +77,82 @@ public class TrackingService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
         AppLog.d("[TrackingService] onStartCommand");
-        checkLastRecord();
-        return START_STICKY;
+        //checkLastRecordWithRxTimer();
+//        Intent i = new Intent(this, MyIntentService.class);
+//        startService(i);
+        return START_NOT_STICKY;
+    }
+
+    public void startRXTimer(){
+        doGetCurrentLocaiton();
+        mRXTimer =  new app.mmguardian.com.location_tracking.utils.CountDownTimer(Constants.SCHEDULER_TIME_SEC, TimeUnit.SECONDS) {
+
+            @Override
+            public void onTick(long tickValue) {
+                AppLog.d("RX Timer >> on Remain "+ tickValue);
+                EventBus.getDefault().post(new RemainTimeEvent( (int)tickValue ));
+            }
+
+            @Override
+            public void onFinish() {
+                startRXTimer();
+                AppLog.d("RX Timer >> on Finish");
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                AppLog.d("RX Timer >> on Error>>"+ e.toString());
+            }
+        };
+        mRXTimer.start();
+    }
+
+    public void checkLastRecordWithRxTimer(){
+        if (mRXTimer==null || !mRXTimer.isRunning()){
+            if (mPreferenceManager == null)
+                mPreferenceManager = new PreferenceManager(this);
+
+            long lastInsertDate = mPreferenceManager.getLongPref("LAST_INSERT_DATE");
+            AppLog.d("lastInsertDate>>>" + new Date(lastInsertDate));
+            if (lastInsertDate == 0) {
+                AppLog.d("lastInsertDate is == 0");
+                startRXTimer();
+            } else {
+                if (mdiffRXTimer!=null){
+                    mdiffRXTimer.cancel();
+                }
+                int diffSec = (int) ((java.util.Calendar.getInstance().getTime().getTime() - lastInsertDate) / 1000);
+                AppLog.d("now :" + java.util.Calendar.getInstance().getTime());
+                AppLog.d("diffSec before :" +diffSec);
+                diffSec = ((int)Constants.SCHEDULER_TIME_SEC) - diffSec;
+                AppLog.d("diffSec after :" +diffSec);
+                if (diffSec > 0) {
+                    mdiffRXTimer =  new app.mmguardian.com.location_tracking.utils.CountDownTimer( (long)diffSec, TimeUnit.SECONDS) {
+
+                        @Override
+                        public void onTick(long tickValue) {
+                            AppLog.d("RX Timer >> on Remain "+ tickValue);
+                            EventBus.getDefault().post(new RemainTimeEvent( (int)tickValue ));
+                        }
+
+                        @Override
+                        public void onFinish() {
+                            startRXTimer();
+                            AppLog.d("RX Timer >> on Finish");
+                        }
+
+                        @Override
+                        public void onError(Throwable e) {
+                            AppLog.d("RX Timer >> on Error>>"+ e.toString());
+                        }
+                    };
+                    mdiffRXTimer.start();
+                } else {
+                    startRXTimer();
+                }
+            }
+
+        }
     }
 
     public void checkLastRecord(){
@@ -93,7 +171,7 @@ public class TrackingService extends Service {
                 int diffSec = (int) ((java.util.Calendar.getInstance().getTime().getTime() - lastInsertDate) / 1000);
                 AppLog.d("now :" + java.util.Calendar.getInstance().getTime());
                 AppLog.d("diffSec before :" +diffSec);
-                diffSec = Constants.SCHEDULER_TIME_SEC - diffSec;
+                diffSec = ((int)Constants.SCHEDULER_TIME_SEC) - diffSec;
                 AppLog.d("diffSec after :" +diffSec);
                 if (diffSec > 0) {
                     mOneTimeOnlyCountDownTimer = new CountDownTimer(diffSec * 1000 , 1000) {
@@ -146,6 +224,9 @@ public class TrackingService extends Service {
     @Override
     public void onDestroy() {
         AppLog.d( "onDestroy >>>");
+        if (mRXTimer!=null){
+            mRXTimer.cancel();
+        }
         doStopMainCountDownTimer();
         Intent broadcastIntent = new Intent();
         Context c = null;

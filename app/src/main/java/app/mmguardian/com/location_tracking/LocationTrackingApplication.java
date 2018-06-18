@@ -3,7 +3,10 @@ package app.mmguardian.com.location_tracking;
 import android.app.Application;
 import android.arch.persistence.room.Room;
 
+
+
 import app.mmguardian.com.location_tracking.db.LocationDatabase;
+
 
 /**
  * The Main application class
@@ -26,7 +29,6 @@ public class LocationTrackingApplication extends Application {
         instance = this;
         mLocationDatabase =
                 Room.databaseBuilder(getApplicationContext(), LocationDatabase.class, "location.db").build();
-
     }
 
     public LocationDatabase getLocationDatabase() {

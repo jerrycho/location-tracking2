@@ -89,12 +89,28 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
         if (!Util.isServiceRunning(this, TrackingService.class)){
             startService(new Intent(this, TrackingService.class));
         }
+
+        //whitelist
+        /*
+        Intent intent = new Intent();
+        String packageName = getPackageName();
+        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        if (pm.isIgnoringBatteryOptimizations(packageName))
+            intent.setAction(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS);
+        else {
+            intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+            intent.setData(Uri.parse("package:" + packageName));
+        }
+        startActivity(intent);
+        */
+
     }
 
     public boolean havePermission(){
         return EasyPermissions.hasPermissions(this, new String[] {
                 Manifest.permission.ACCESS_COARSE_LOCATION,
-                Manifest.permission.ACCESS_FINE_LOCATION
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
         });
     }
 
@@ -102,7 +118,8 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
     public void doRequestPermission(){
         if (EasyPermissions.hasPermissions(this, new String[] {
                 Manifest.permission.ACCESS_COARSE_LOCATION,
-                Manifest.permission.ACCESS_FINE_LOCATION
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
         })){
             doStartService();
         }

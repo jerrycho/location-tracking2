@@ -61,4 +61,18 @@ public class LocationRecord {
         this.longitude = longitude;
 
     }
+
+    @Override
+    public String toString() {
+        return "LocationRecord{" +
+                "id=" + id +
+                ", mLocation=" + mLocation +
+                ", isNull=" + isNull +
+                ", date=" + date +
+                ", latitude=" + latitude +
+                ", longitude=" + longitude +
+                ", altitude=" + altitude +
+                ", address='" + address + '\'' +
+                '}';
+    }
 }
