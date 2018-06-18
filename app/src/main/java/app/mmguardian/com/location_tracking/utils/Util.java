@@ -60,7 +60,19 @@ public class Util {
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
-        if (Util.isNetworkingConnected()) {
+//        if (Util.isNetworkingConnected()) {
+//            mFusedLocationProviderClient.getLastLocation()
+//                    .addOnSuccessListener(new OnSuccessListener<Location>() {
+//                        @Override
+//                        public void onSuccess(Location location) {
+//                            new AsyncInsertDBTaskRunner(context).execute(location);
+//                        }
+//                    });
+//        }
+//        else {
+//            new AsyncInsertDBTaskRunner(context).execute((Location) null);
+//        }
+        //if (Util.isNetworkingConnected()) {
             mFusedLocationProviderClient.getLastLocation()
                     .addOnSuccessListener(new OnSuccessListener<Location>() {
                         @Override
@@ -68,9 +80,9 @@ public class Util {
                             new AsyncInsertDBTaskRunner(context).execute(location);
                         }
                     });
-        }
-        else {
-            new AsyncInsertDBTaskRunner(context).execute((Location) null);
-        }
+//        }
+//        else {
+//            new AsyncInsertDBTaskRunner(context).execute((Location) null);
+//        }
     }
 }

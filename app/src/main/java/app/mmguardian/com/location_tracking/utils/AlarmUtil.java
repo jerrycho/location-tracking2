@@ -37,7 +37,7 @@ public class AlarmUtil {
     public static void setAlarmTime4(Context context){
         AppLog.d("AlarmUtil.setAlarmTime4(context);");
 
-        Util.getCurrentLocaiton(context);
+        //Util.getCurrentLocaiton(context);
 
         Intent _intent = new Intent(context, AlarmReceiver.class);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, _intent, 0);
