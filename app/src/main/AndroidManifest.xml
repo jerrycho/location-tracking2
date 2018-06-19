@@ -8,6 +8,7 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
 
     <application
@@ -31,39 +32,10 @@
             </intent-filter>
         </activity>
 
-        <receiver
-            android:name=".receiver.ServiceRequestRestartBroadcastReceiver"
-            android:enabled="true"
-            android:exported="true"
-            android:label="RestartServiceWhenStopped">
-            <intent-filter>
-                <action android:name="app.mmguardian.com.location_tracking.ServiceRequestRestart"/>
-            </intent-filter>
-        </receiver>
 
-        <service android:name=".service.TrackingService"
-            android:enabled="true"
-            android:exported="true"/>
-
-        <service android:name=".service.MyIntentService"/>
 
         <service android:name=".service.CountDownTimerIntentService"/>
 
-        <receiver android:name=".receiver.NotificationPublisher" />
-
-        <!--<receiver-->
-            <!--android:process=":remote"-->
-            <!--android:name=".receiver.AlarmReceiver" />-->
-
-        <receiver
-            android:name=".receiver.ServiceRequestRestartBroadcastReceiver"
-            android:enabled="true"
-            android:exported="true"
-            android:label="RestartServiceWhenStopped">
-            <intent-filter>
-                <action android:name="app.mmguardian.com.location_tracking.ServiceRequestRestart"/>
-            </intent-filter>
-        </receiver>
 
         <receiver
             android:name=".receiver.AlarmReceiver"

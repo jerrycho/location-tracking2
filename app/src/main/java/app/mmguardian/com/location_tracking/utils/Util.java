@@ -5,21 +5,19 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.support.v4.app.ActivityCompat;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.net.SocketAddress;
 import java.util.Calendar;
 
 import app.mmguardian.com.Constants;
 import app.mmguardian.com.location_tracking.log.AppLog;
-import app.mmguardian.com.location_tracking.service.MyIntentService;
+
 import app.mmguardian.com.location_tracking.task.AsyncInsertDBTaskRunner;
 
 /**
@@ -57,40 +55,32 @@ public class Util {
 
         return diffSec;
 
-//        long after = 0;
-//        Calendar c = Calendar.getInstance();
-//        if (lastInsertDate == 0){
-//            after = c.getTimeInMillis();
+    }
+
+    public static boolean isNetworkingConnected(Context context){
+//        Runtime runtime = Runtime.getRuntime();
+//        try {
+//            Process ipProcess = runtime.exec("/system/bin/ping -c 1 8.8.8.8");
+//            int exitValue = ipProcess.waitFor();
+//
+//            return (exitValue == 0);
+//
+//        } catch (IOException | InterruptedException e) {
+//            e.printStackTrace();
 //        }
-//        else {
-//            int diffSec = (int) ((c.getTime().getTime() - lastInsertDate) / 1000);
-//            diffSec = ((int) Constants.SCHEDULER_TIME_SEC) - diffSec;
-//            if (diffSec > 0){
-//                c.add(Calendar.SECOND, diffSec);
-//            }
-//            after = c.getTimeInMillis();
-//        }
-
+//
+//        return false;
+        boolean connected = false;
+        ConnectivityManager connectivityManager = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        if(connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState() == NetworkInfo.State.CONNECTED ||
+                connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState() == NetworkInfo.State.CONNECTED) {
+            //we are connected to a network
+            connected = true;
+        }
+        else
+            connected = false;
+        return connected;
     }
-
-    public static boolean isNetworkingConnected(){
-        return true;
-    }
-
-
-    public static boolean isInternetAvailable(String address, int port, int timeoutMs) {
-        try {
-            Socket sock = new Socket();
-            SocketAddress sockaddr = new InetSocketAddress(address, port);
-
-            sock.connect(sockaddr, timeoutMs); // This will block no more than timeoutMs
-            sock.close();
-
-            return true;
-
-        } catch (IOException e) { return false; }
-    }
-
 
 
     /**
@@ -106,7 +96,7 @@ public class Util {
         }
 
 
-        if (Util.isNetworkingConnected()) {
+        if (Util.isNetworkingConnected(context)) {
             mFusedLocationProviderClient.getLastLocation()
                     .addOnSuccessListener(new OnSuccessListener<Location>() {
                         @Override

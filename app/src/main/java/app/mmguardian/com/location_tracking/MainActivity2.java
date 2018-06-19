@@ -34,11 +34,8 @@ import app.mmguardian.com.location_tracking.bus.NewLocationTrackingRecordEvent;
 import app.mmguardian.com.location_tracking.bus.RemainTimeEvent;
 import app.mmguardian.com.location_tracking.db.model.LocationRecord;
 import app.mmguardian.com.location_tracking.fragment.GoogleMapFragment;
-import app.mmguardian.com.location_tracking.receiver.AlarmReceiver;
-import app.mmguardian.com.location_tracking.service.TrackingService;
 import app.mmguardian.com.location_tracking.utils.AlarmUtil;
 import app.mmguardian.com.location_tracking.utils.FragmentUtils;
-import app.mmguardian.com.location_tracking.utils.Util;
 import io.reactivex.functions.Consumer;
 import pub.devrel.easypermissions.EasyPermissions;
 
@@ -49,6 +46,7 @@ import pub.devrel.easypermissions.EasyPermissions;
 public class MainActivity2 extends AppCompatActivity implements EasyPermissions.PermissionCallbacks{
 
     private static final int REQUEST_PERMISSION_RESULT = 1001;
+    private static final int ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS = 1003;
 
     RecyclerView rcvLocationRecord;
     LocationAdatper mAdapter;
@@ -82,8 +80,7 @@ public class MainActivity2 extends AppCompatActivity implements EasyPermissions.
         new AsyncGetRecordFromDBTaskRunner().execute();
 
         if (haveAllPermission()){
-            cbHaveRight.setChecked(true);
-            AlarmUtil.setAlarmTime4(MainActivity2.this);
+            sendToWhiteList();
         }
         else {
             EasyPermissions.requestPermissions(this,
@@ -111,8 +108,7 @@ public class MainActivity2 extends AppCompatActivity implements EasyPermissions.
 
     @Override
     public void onPermissionsGranted(int i, List<String> list) {
-        cbHaveRight.setChecked(true);
-        AlarmUtil.setAlarmTime4(MainActivity2.this);
+        sendToWhiteList();
     }
 
     @Override
@@ -124,6 +120,17 @@ public class MainActivity2 extends AppCompatActivity implements EasyPermissions.
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS){
+            if (resultCode==RESULT_OK){
+                AlarmUtil.setAlarmTime4(MainActivity2.this);
+            }
+        }
+
     }
 
     @Override
@@ -170,6 +177,22 @@ public class MainActivity2 extends AppCompatActivity implements EasyPermissions.
 
     private String displayHHMMSSBySec(long secs) {
         return "Update remain : " + String.format("%02d:%02d:%02d", (secs % 86400) / 3600, (secs % 3600) / 60, secs % 60);
+    }
+
+    private void sendToWhiteList(){
+        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+        String packageName = getApplicationContext().getPackageName();
+        boolean ignoringOptimizations = powerManager.isIgnoringBatteryOptimizations(packageName);
+
+        if (!ignoringOptimizations) {
+            Intent intent = new Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+            intent.setData(Uri.parse("package:" + packageName));
+            startActivityForResult(intent, ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+        }
+        else {
+            AlarmUtil.setAlarmTime4(MainActivity2.this);
+        }
+
     }
 
 }

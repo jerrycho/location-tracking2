@@ -6,18 +6,13 @@ import android.app.IntentService;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.os.Build;
-import android.os.Bundle;
-import android.os.SystemClock;
-import android.util.Log;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 import app.mmguardian.com.Constants;
-import app.mmguardian.com.location_tracking.MainActivity;
-import app.mmguardian.com.location_tracking.MainActivity2;
+
+
 import app.mmguardian.com.location_tracking.log.AppLog;
 import app.mmguardian.com.location_tracking.receiver.AlarmReceiver;
 import app.mmguardian.com.location_tracking.service.CountDownTimerIntentService;
