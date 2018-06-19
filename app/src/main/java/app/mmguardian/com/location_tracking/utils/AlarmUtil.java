@@ -22,6 +22,28 @@ import app.mmguardian.com.location_tracking.receiver.AlarmReceiver;
 
 public class AlarmUtil {
 
+//    public static void setAlarmTime4(Context context){
+//        AppLog.d("AlarmUtil.setAlarmTime4(context);");
+//
+//        //Util.getCurrentLocaiton(context);
+//
+//        Intent _intent = new Intent(context, AlarmReceiver.class);
+//        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, _intent, 0);
+//        AlarmManager alarmManager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
+//        // Remove any previous pending intent.
+//        try {
+//            alarmManager.cancel(pendingIntent);
+//        } catch (Exception e){
+//            e.printStackTrace();
+//        }
+//
+//        Calendar c = Calendar.getInstance();
+//        c.add(Calendar.SECOND, 10);
+//        long after = c.getTimeInMillis();
+//
+//        alarmManager.set(AlarmManager.RTC_WAKEUP, after , pendingIntent);
+//    }
+
     public static void setAlarmTime4(Context context){
         AppLog.d("AlarmUtil.setAlarmTime4(context);");
 
@@ -55,6 +77,7 @@ public class AlarmUtil {
 
         long after = 0;
         if (lastInsertDate == 0){
+            c.add(Calendar.SECOND, 5);
             after = c.getTimeInMillis();
         }
         else {
@@ -62,6 +85,8 @@ public class AlarmUtil {
             diffSec = ((int) Constants.SCHEDULER_TIME_SEC) - diffSec;
             if (diffSec > 0){
                 c.add(Calendar.SECOND, diffSec);
+            }else {
+                c.add(Calendar.SECOND, 5);
             }
             after = c.getTimeInMillis();
         }

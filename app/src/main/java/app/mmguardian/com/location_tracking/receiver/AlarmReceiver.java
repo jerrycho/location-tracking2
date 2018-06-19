@@ -38,5 +38,11 @@ public class AlarmReceiver extends BroadcastReceiver {
         Util.getCurrentLocaiton(Calendar.getInstance(), context);
     }
 
-
+//    @Override
+//    public void onReceive(Context context, Intent intent) {
+//        AppLog.d("AlarmReceiver do something");
+//
+//        //AlarmUtil.setAlarmTime(context); //work
+//        AlarmUtil.setAlarmTime4(context);
+//    }
 }
