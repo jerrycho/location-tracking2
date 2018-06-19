@@ -31,6 +31,7 @@ import java.util.List;
 
 import app.mmguardian.com.location_tracking.adapter.LocationAdatper;
 import app.mmguardian.com.location_tracking.bus.NewLocationTrackingRecordEvent;
+import app.mmguardian.com.location_tracking.bus.RemainTimeEvent;
 import app.mmguardian.com.location_tracking.db.model.LocationRecord;
 import app.mmguardian.com.location_tracking.fragment.GoogleMapFragment;
 import app.mmguardian.com.location_tracking.receiver.AlarmReceiver;
@@ -161,4 +162,14 @@ public class MainActivity2 extends AppCompatActivity implements EasyPermissions.
             rcvLocationRecord.setAdapter(mAdapter);
         }
     }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onRemainTimeEvent(RemainTimeEvent event) {
+        tvCountDownTime.setText(displayHHMMSSBySec(event.getmSecond()));
+    }
+
+    private String displayHHMMSSBySec(long secs) {
+        return "Update remain : " + String.format("%02d:%02d:%02d", (secs % 86400) / 3600, (secs % 3600) / 60, secs % 60);
+    }
+
 }

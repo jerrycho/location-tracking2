@@ -2,6 +2,7 @@ package app.mmguardian.com.location_tracking.utils;
 
 
 import android.app.AlarmManager;
+import android.app.IntentService;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -19,6 +20,7 @@ import app.mmguardian.com.location_tracking.MainActivity;
 import app.mmguardian.com.location_tracking.MainActivity2;
 import app.mmguardian.com.location_tracking.log.AppLog;
 import app.mmguardian.com.location_tracking.receiver.AlarmReceiver;
+import app.mmguardian.com.location_tracking.service.CountDownTimerIntentService;
 
 public class AlarmUtil {
 
@@ -77,6 +79,7 @@ public class AlarmUtil {
 
         long after = 0;
         if (lastInsertDate == 0){
+            sendToCountDownTimerIntentService(context, 5);
             c.add(Calendar.SECOND, 5);
             after = c.getTimeInMillis();
         }
@@ -84,8 +87,10 @@ public class AlarmUtil {
             int diffSec = (int) ((c.getTimeInMillis() - lastInsertDate) / 1000);
             diffSec = ((int) Constants.SCHEDULER_TIME_SEC) - diffSec;
             if (diffSec > 0){
+                sendToCountDownTimerIntentService(context, diffSec);
                 c.add(Calendar.SECOND, diffSec);
             }else {
+                sendToCountDownTimerIntentService(context, 5);
                 c.add(Calendar.SECOND, 5);
             }
             after = c.getTimeInMillis();
@@ -94,6 +99,12 @@ public class AlarmUtil {
         AppLog.d("lastDate >>> next time should : "+ sdFormat.format(c.getTime()) );
 
         alarmManager.set(AlarmManager.RTC_WAKEUP, after , pendingIntent);
+    }
+
+    private static void sendToCountDownTimerIntentService(Context context, int remainSec){
+        Intent i = new Intent(context, CountDownTimerIntentService.class);
+        i.putExtra(CountDownTimerIntentService.EXTRA_REMAIN, remainSec);
+        context.startService(i);
     }
 
 

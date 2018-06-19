@@ -33,6 +33,8 @@ public class AlarmReceiver extends BroadcastReceiver {
         PreferenceManager mPreferenceManager = new PreferenceManager(context);
         mPreferenceManager.setLongPref("LAST_INSERT_DATE", currentDatetime);
 
+        //at this time, event bus to mainactivty start the count down counter!
+
         AlarmUtil.setAlarmTime4(context);
 
         Util.getCurrentLocaiton(Calendar.getInstance(), context);

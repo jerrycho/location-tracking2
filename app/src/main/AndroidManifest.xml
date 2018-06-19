@@ -47,6 +47,8 @@
 
         <service android:name=".service.MyIntentService"/>
 
+        <service android:name=".service.CountDownTimerIntentService"/>
+
         <receiver android:name=".receiver.NotificationPublisher" />
 
         <!--<receiver-->
