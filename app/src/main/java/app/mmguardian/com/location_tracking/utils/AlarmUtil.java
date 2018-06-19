@@ -7,12 +7,16 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 import app.mmguardian.com.Constants;
 
 
+import app.mmguardian.com.location_tracking.bus.RemainTimeEvent;
+import app.mmguardian.com.location_tracking.bus.StartDownTimerEvent;
 import app.mmguardian.com.location_tracking.log.AppLog;
 import app.mmguardian.com.location_tracking.receiver.AlarmReceiver;
 import app.mmguardian.com.location_tracking.service.CountDownTimerIntentService;
@@ -56,13 +60,6 @@ public class AlarmUtil {
             e.printStackTrace();
         }
 
-//        Calendar c = Calendar.getInstance();
-//        int diffSec = Util.getLastInsertWithCurrentDiffSec(c, context);
-//
-//        if (diffSec > 0){
-//            c.add(Calendar.SECOND, diffSec);
-//        }
-
         SimpleDateFormat sdFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         long lastInsertDate = new PreferenceManager(context).getLongPref("LAST_INSERT_DATE");
         Calendar lastDate = Calendar.getInstance();
@@ -93,13 +90,15 @@ public class AlarmUtil {
 
         AppLog.d("lastDate >>> next time should : "+ sdFormat.format(c.getTime()) );
 
-        alarmManager.set(AlarmManager.RTC_WAKEUP, after , pendingIntent);
+        //alarmManager.set(AlarmManager.RTC_WAKEUP, after , pendingIntent);
+        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC, after, pendingIntent);
     }
 
     private static void sendToCountDownTimerIntentService(Context context, int remainSec){
-        Intent i = new Intent(context, CountDownTimerIntentService.class);
-        i.putExtra(CountDownTimerIntentService.EXTRA_REMAIN, remainSec);
-        context.startService(i);
+//        Intent i = new Intent(context, CountDownTimerIntentService.class);
+//        i.putExtra(CountDownTimerIntentService.EXTRA_REMAIN, remainSec);
+//        context.startService(i);
+        EventBus.getDefault().post(new StartDownTimerEvent(remainSec));
     }
 
 

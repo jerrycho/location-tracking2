@@ -27,13 +27,17 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.Calendar;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 
 import app.mmguardian.com.location_tracking.adapter.LocationAdatper;
 import app.mmguardian.com.location_tracking.bus.NewLocationTrackingRecordEvent;
 import app.mmguardian.com.location_tracking.bus.RemainTimeEvent;
+import app.mmguardian.com.location_tracking.bus.StartDownTimerEvent;
 import app.mmguardian.com.location_tracking.db.model.LocationRecord;
 import app.mmguardian.com.location_tracking.fragment.GoogleMapFragment;
+import app.mmguardian.com.location_tracking.log.AppLog;
+import app.mmguardian.com.location_tracking.service.CountDownTimerIntentService;
 import app.mmguardian.com.location_tracking.utils.AlarmUtil;
 import app.mmguardian.com.location_tracking.utils.FragmentUtils;
 import io.reactivex.functions.Consumer;
@@ -54,6 +58,7 @@ public class MainActivity2 extends AppCompatActivity implements EasyPermissions.
     public TextView tvCountDownTime;
     CheckBox cbHaveRight;
 
+    app.mmguardian.com.location_tracking.utils.CountDownTimer mRXTimer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -192,7 +197,33 @@ public class MainActivity2 extends AppCompatActivity implements EasyPermissions.
         else {
             AlarmUtil.setAlarmTime4(MainActivity2.this);
         }
-
     }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onStartDownTimerEvent(StartDownTimerEvent event){
+        if (mRXTimer!=null && mRXTimer.isRunning())
+            mRXTimer.cancel();
+        mRXTimer =  new app.mmguardian.com.location_tracking.utils.CountDownTimer(Long.valueOf(event.getFrom()), TimeUnit.SECONDS) {
+
+            @Override
+            public void onTick(long tickValue) {
+                AppLog.d("RX My Intent Service Timer >> on Remain "+ tickValue);
+                EventBus.getDefault().post(new RemainTimeEvent( (int)tickValue ));
+            }
+
+            @Override
+            public void onFinish() {
+                AppLog.d("RX Timer >> on Finish");
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                AppLog.d("RX Timer >> on Error>>"+ e.toString());
+            }
+        };
+        mRXTimer.start();
+    }
+
+
 
 }
