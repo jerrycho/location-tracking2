@@ -4,6 +4,9 @@ package app.mmguardian.com.location_tracking.log;
 import android.os.Build;
 import android.util.Log;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+
 import app.mmguardian.com.location_tracking.BuildConfig;
 
 /**
@@ -25,5 +28,17 @@ public class AppLog {
         }
     }
 
+    public static void d(String m , long timeInMillis) {
+        SimpleDateFormat sdFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Calendar c = Calendar.getInstance();
+        c.setTimeInMillis(timeInMillis);
+
+        if(BuildConfig.DEBUG) {
+            if ("F3116".equalsIgnoreCase(Build.MODEL))
+                System.out.println("["+TAG+"] "+ "Time of "+ m +" : "+ sdFormat.format(c.getTime()));
+            else
+                Log.d(TAG, "Time of "+ m +" : "+ sdFormat.format(c.getTime()));
+        }
+    }
 
 }

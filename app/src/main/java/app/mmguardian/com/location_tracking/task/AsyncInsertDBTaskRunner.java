@@ -27,10 +27,12 @@ public class AsyncInsertDBTaskRunner extends AsyncTask<Location, Void, Void> {
     Geocoder mGeocoder;
 
     private Context mContext;
+    private java.util.Calendar mCalendar;
     private PreferenceManager mPreferenceManager;
 
-    public AsyncInsertDBTaskRunner(Context context) {
+    public AsyncInsertDBTaskRunner(java.util.Calendar calendar, Context context) {
         this.mContext = context;
+        this.mCalendar = calendar;
     }
 
     @Override
@@ -78,11 +80,8 @@ public class AsyncInsertDBTaskRunner extends AsyncTask<Location, Void, Void> {
             address = TextUtils.join(System.getProperty("line.separator"), alAddress);
         }
 
-        long currentDatetime = Calendar.getInstance().getTimeInMillis();
-        if (mPreferenceManager == null) {
-            mPreferenceManager = new PreferenceManager(mContext);
-        }
-        mPreferenceManager.setLongPref("LAST_INSERT_DATE", currentDatetime);
+        long currentDatetime = mCalendar.getTimeInMillis();
+
         long beforeDate = currentDatetime - Constants.RECORD_KEEP;
         LocationTrackingApplication.getInstance().getLocationDatabase().locationRecordDao().deleteBeforeDate(beforeDate - Constants.RECORD_KEEP);
         LocationRecord mLocationRecord = new LocationRecord(currentDatetime, location, address);

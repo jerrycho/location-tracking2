@@ -85,7 +85,7 @@ public class TrackingService extends Service {
 
     public void startRXTimer(){
         doGetCurrentLocaiton();
-        mRXTimer =  new app.mmguardian.com.location_tracking.utils.CountDownTimer(Constants.SCHEDULER_TIME_SEC, TimeUnit.SECONDS) {
+        mRXTimer =  new app.mmguardian.com.location_tracking.utils.CountDownTimer(Long.valueOf(Constants.SCHEDULER_TIME_SEC), TimeUnit.SECONDS) {
 
             @Override
             public void onTick(long tickValue) {

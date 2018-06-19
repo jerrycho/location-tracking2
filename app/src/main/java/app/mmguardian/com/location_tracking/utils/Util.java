@@ -11,6 +11,13 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
 
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.SocketAddress;
+import java.util.Calendar;
+
+import app.mmguardian.com.Constants;
 import app.mmguardian.com.location_tracking.log.AppLog;
 import app.mmguardian.com.location_tracking.service.MyIntentService;
 import app.mmguardian.com.location_tracking.task.AsyncInsertDBTaskRunner;
@@ -40,19 +47,56 @@ public class Util {
         return false;
     }
 
-    public static boolean isNetworkingConnected(){
-        try {
-            String command = "ping -c 1 google.com";
-            return (Runtime.getRuntime().exec(command).waitFor() == 0);
-        }catch (Exception e){
-            return false;
+    public static int getLastInsertWithCurrentDiffSec(Calendar calendar, Context context){
+        long lastInsertDate = new PreferenceManager(context).getLongPref("LAST_INSERT_DATE");
+        int diffSec = 0;
+        if (lastInsertDate>0) {
+            diffSec = (int) ((calendar.getTime().getTime() - lastInsertDate) / 1000);
+            diffSec = ((int) Constants.SCHEDULER_TIME_SEC) - diffSec;
         }
+
+        return diffSec;
+
+//        long after = 0;
+//        Calendar c = Calendar.getInstance();
+//        if (lastInsertDate == 0){
+//            after = c.getTimeInMillis();
+//        }
+//        else {
+//            int diffSec = (int) ((c.getTime().getTime() - lastInsertDate) / 1000);
+//            diffSec = ((int) Constants.SCHEDULER_TIME_SEC) - diffSec;
+//            if (diffSec > 0){
+//                c.add(Calendar.SECOND, diffSec);
+//            }
+//            after = c.getTimeInMillis();
+//        }
+
     }
+
+    public static boolean isNetworkingConnected(){
+        return true;
+    }
+
+
+    public static boolean isInternetAvailable(String address, int port, int timeoutMs) {
+        try {
+            Socket sock = new Socket();
+            SocketAddress sockaddr = new InetSocketAddress(address, port);
+
+            sock.connect(sockaddr, timeoutMs); // This will block no more than timeoutMs
+            sock.close();
+
+            return true;
+
+        } catch (IOException e) { return false; }
+    }
+
+
 
     /**
      * This method is used to get current location information
      */
-    public static void getCurrentLocaiton(Context context) {
+    public static void getCurrentLocaiton(Calendar calendar, Context context) {
         AppLog.d( "getCurrentLocaiton :" );
 
         FusedLocationProviderClient mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context);
@@ -60,29 +104,20 @@ public class Util {
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
-//        if (Util.isNetworkingConnected()) {
-//            mFusedLocationProviderClient.getLastLocation()
-//                    .addOnSuccessListener(new OnSuccessListener<Location>() {
-//                        @Override
-//                        public void onSuccess(Location location) {
-//                            new AsyncInsertDBTaskRunner(context).execute(location);
-//                        }
-//                    });
-//        }
-//        else {
-//            new AsyncInsertDBTaskRunner(context).execute((Location) null);
-//        }
-        //if (Util.isNetworkingConnected()) {
+
+
+        if (Util.isNetworkingConnected()) {
             mFusedLocationProviderClient.getLastLocation()
                     .addOnSuccessListener(new OnSuccessListener<Location>() {
                         @Override
                         public void onSuccess(Location location) {
-                            new AsyncInsertDBTaskRunner(context).execute(location);
+                            new AsyncInsertDBTaskRunner(calendar, context).execute(location);
                         }
                     });
-//        }
-//        else {
-//            new AsyncInsertDBTaskRunner(context).execute((Location) null);
-//        }
+        }
+        else {
+            new AsyncInsertDBTaskRunner(calendar, context).execute((Location) null);
+        }
+
     }
 }
