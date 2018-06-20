@@ -1,7 +1,6 @@
 package app.mmguardian.com.location_tracking.task;
 
 import android.content.Context;
-import android.icu.util.Calendar;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -92,4 +91,5 @@ public class AsyncInsertDBTaskRunner extends AsyncTask<Location, Void, Void> {
 
         return null;
     }
+
 }

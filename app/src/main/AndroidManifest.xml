@@ -32,7 +32,14 @@
             </intent-filter>
         </activity>
 
-
+        <receiver
+            android:name=".receiver.SensorRestarterBroadcastReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="app.mmguardian.com.location_tracking.RequestRestart"/>
+            </intent-filter>
+        </receiver>
 
         <service android:name=".service.CountDownTimerIntentService"/>
 

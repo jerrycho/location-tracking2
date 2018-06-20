@@ -3,16 +3,11 @@ package app.mmguardian.com.location_tracking.receiver;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.location.Location;
-import android.os.Build;
-import android.util.Log;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
-import app.mmguardian.com.location_tracking.BuildConfig;
 import app.mmguardian.com.location_tracking.log.AppLog;
-import app.mmguardian.com.location_tracking.task.AsyncInsertDBTaskRunner;
 import app.mmguardian.com.location_tracking.utils.AlarmUtil;
 import app.mmguardian.com.location_tracking.utils.PreferenceManager;
 import app.mmguardian.com.location_tracking.utils.Util;
@@ -24,8 +19,9 @@ public class AlarmReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
 
-        SimpleDateFormat sdFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat sdFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");
         Calendar c = Calendar.getInstance();
+        c.set(Calendar.MILLISECOND, 0);
 
         AppLog.d("AlarmReceiver do something >> "+ sdFormat.format(c.getTime()));
 
@@ -37,7 +33,8 @@ public class AlarmReceiver extends BroadcastReceiver {
 
         AlarmUtil.setAlarmTime4(context);
 
-        Util.getCurrentLocaiton(Calendar.getInstance(), context);
+        Util.getCurrentLocaiton(c, context);
+
     }
 
 //    @Override

@@ -1,24 +1,17 @@
 package app.mmguardian.com.location_tracking;
 
 import android.Manifest;
-import android.app.Activity;
-import android.app.AlarmManager;
-import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.PowerManager;
-import android.os.SystemClock;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.View;
 import android.widget.CheckBox;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.greenrobot.eventbus.EventBus;
@@ -30,6 +23,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 
+import app.mmguardian.com.Constants;
 import app.mmguardian.com.location_tracking.adapter.LocationAdatper;
 import app.mmguardian.com.location_tracking.bus.NewLocationTrackingRecordEvent;
 import app.mmguardian.com.location_tracking.bus.RemainTimeEvent;
@@ -37,9 +31,10 @@ import app.mmguardian.com.location_tracking.bus.StartDownTimerEvent;
 import app.mmguardian.com.location_tracking.db.model.LocationRecord;
 import app.mmguardian.com.location_tracking.fragment.GoogleMapFragment;
 import app.mmguardian.com.location_tracking.log.AppLog;
-import app.mmguardian.com.location_tracking.service.CountDownTimerIntentService;
+import app.mmguardian.com.location_tracking.receiver.SensorRestarterBroadcastReceiver;
 import app.mmguardian.com.location_tracking.utils.AlarmUtil;
 import app.mmguardian.com.location_tracking.utils.FragmentUtils;
+import app.mmguardian.com.location_tracking.utils.PreferenceManager;
 import io.reactivex.functions.Consumer;
 import pub.devrel.easypermissions.EasyPermissions;
 
@@ -135,14 +130,38 @@ public class MainActivity2 extends AppCompatActivity implements EasyPermissions.
                 AlarmUtil.setAlarmTime4(MainActivity2.this);
             }
         }
-
     }
 
     @Override
     protected void onDestroy() {
+        super.onDestroy();
         app.mmguardian.com.location_tracking.log.AppLog.d("MainActivity onDestory");
         EventBus.getDefault().unregister(this);
-        super.onDestroy();
+        Intent intent = new Intent(this, SensorRestarterBroadcastReceiver.class);
+        sendBroadcast(intent);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        checkTimer();
+    }
+
+    private void checkTimer(){
+        long lastInsertDate = new PreferenceManager(MainActivity2.this).getLongPref("LAST_INSERT_DATE");
+        AppLog.d("lastInsertDate>>> " + lastInsertDate);
+        Calendar lastDate = Calendar.getInstance();
+        lastDate.setTimeInMillis(lastInsertDate);
+        Calendar c = Calendar.getInstance();
+        c.set(Calendar.MILLISECOND, 0);
+        if (lastInsertDate == 0){
+
+        }
+        else {
+            int diffSec = (int) ((c.getTimeInMillis() - lastInsertDate) / 1000);
+            diffSec = ((int) Constants.SCHEDULER_TIME_SEC) - diffSec;
+            EventBus.getDefault().post(new StartDownTimerEvent(diffSec));
+        }
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -161,6 +180,9 @@ public class MainActivity2 extends AppCompatActivity implements EasyPermissions.
 
         @Override
         protected void onPostExecute(List<LocationRecord> locationRecords) {
+
+            checkTimer();
+
             mAdapter = new LocationAdatper(locationRecords);
             mAdapter.setOnMapClick(new Consumer<LocationRecord>() {
                 @Override
@@ -185,13 +207,9 @@ public class MainActivity2 extends AppCompatActivity implements EasyPermissions.
     }
 
     private void sendToWhiteList(){
-        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-        String packageName = getApplicationContext().getPackageName();
-        boolean ignoringOptimizations = powerManager.isIgnoringBatteryOptimizations(packageName);
-
-        if (!ignoringOptimizations) {
+        if (!ignoringOptimizations()) {
             Intent intent = new Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
-            intent.setData(Uri.parse("package:" + packageName));
+            intent.setData(Uri.parse("package:" + getApplicationContext().getPackageName()));
             startActivityForResult(intent, ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
         }
         else {
@@ -199,9 +217,15 @@ public class MainActivity2 extends AppCompatActivity implements EasyPermissions.
         }
     }
 
+    private boolean ignoringOptimizations(){
+        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+        String packageName = getApplicationContext().getPackageName();
+        return powerManager.isIgnoringBatteryOptimizations(packageName);
+    }
+
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onStartDownTimerEvent(StartDownTimerEvent event){
-        if (mRXTimer!=null && mRXTimer.isRunning())
+        if (mRXTimer!=null)
             mRXTimer.cancel();
         mRXTimer =  new app.mmguardian.com.location_tracking.utils.CountDownTimer(Long.valueOf(event.getFrom()), TimeUnit.SECONDS) {
 

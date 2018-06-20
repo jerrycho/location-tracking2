@@ -6,6 +6,7 @@ import android.arch.persistence.room.Room;
 
 
 import app.mmguardian.com.location_tracking.db.LocationDatabase;
+import app.mmguardian.com.location_tracking.log.AppLog;
 
 
 /**
@@ -34,4 +35,5 @@ public class LocationTrackingApplication extends Application {
     public LocationDatabase getLocationDatabase() {
         return mLocationDatabase;
     }
+
 }

@@ -29,7 +29,7 @@ public class AppLog {
     }
 
     public static void d(String m , long timeInMillis) {
-        SimpleDateFormat sdFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat sdFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");
         Calendar c = Calendar.getInstance();
         c.setTimeInMillis(timeInMillis);
 
