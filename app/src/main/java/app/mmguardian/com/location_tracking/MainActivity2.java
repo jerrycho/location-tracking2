@@ -127,7 +127,7 @@ public class MainActivity2 extends AppCompatActivity implements EasyPermissions.
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS){
             if (resultCode==RESULT_OK){
-                AlarmUtil.setAlarmTime4(MainActivity2.this);
+                sendToWhiteList();
             }
         }
     }
@@ -213,6 +213,7 @@ public class MainActivity2 extends AppCompatActivity implements EasyPermissions.
             startActivityForResult(intent, ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
         }
         else {
+            cbHaveRight.setChecked(true);
             AlarmUtil.setAlarmTime4(MainActivity2.this);
         }
     }
